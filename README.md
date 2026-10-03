@@ -43,9 +43,23 @@ Build-time overrides: `-PAPI_BASE_URL=<url>` bakes a different default server (t
 
 ## Release
 
-Production APKs are built and signed by the g3h **apk-builder** service (`apk.g3h.cloud`), which holds the release keystore — **the keystore never lives in this repo**. The builder consumes a clean source archive (same exclusions as `.gitignore`); per-version SHA-256, cert fingerprint, and §10.1 gate evidence are in `handoff/RELEASE_RECORD.md`.
+Production APKs are built and signed by the g3h **apk-builder** service (`apk.g3h.cloud`), which holds the release keystore — **the keystore never lives in this repo**. Per-version SHA-256, cert fingerprint, and §10.1 gate evidence are in `handoff/RELEASE_RECORD.md`.
 
-The public domain is behind Cloudflare: API calls need a browser-like `User-Agent` or they 403 (WAF 1010).
+The pipeline is **git-tag driven**:
+
+1. Bump `versionCode` / `versionName` in `src/app/build.gradle.kts`, commit, push.
+2. Tag the release: `git tag -a v1.0.3 -m "..." && git push origin v1.0.3`.
+3. Run:
+
+   ```bash
+   export APK_BUILDER_SKILL_KEY=***
+   ./release.sh v1.0.3 4
+   ```
+
+   `release.sh` downloads the tag archive from GitHub, packages `src/`, submits the builder build (appTypeId 9, keystore 7), polls to completion, and writes `handoff/nimbus-speedtest-1.0.3-v4-signed.apk`. It does **not** publish (ATV-Store-only, human-approved).
+4. Run the §10.1 gate on the downloaded APK (badging, apksigner, sha256, placeholder scan) and append evidence to `handoff/RELEASE_RECORD.md`.
+
+The public builder domain is behind Cloudflare: API calls need a browser-like `User-Agent` or they 403 (WAF 1010) — `release.sh` handles this.
 
 ## Tests
 

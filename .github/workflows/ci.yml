@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x src/gradlew
+
+      - name: Build debug APK
+        working-directory: src
+        run: ./gradlew assembleDebug --console=plain
+
+      - name: Run unit + live-emission tests
+        working-directory: src
+        run: ./gradlew :app:testDebugUnitTest --console=plain
+
+      - name: Verify APK badging
+        working-directory: src
+        run: |
+          aapt dump badging app/build/outputs/apk/debug/app-debug.apk \
+            | grep -E "package:|sdkVersion|targetSdkVersion|launchable|leanback"
+          echo "APK built and badging verified"
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: nimbus-debug
+          path: src/app/build/outputs/apk/debug/app-debug.apk
