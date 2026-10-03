@@ -35,7 +35,10 @@ CODE="${2:?usage: release.sh <tag> <versionCode> [builder-base-url]}"
 BASE="${3:-https://apk.g3h.cloud}"
 UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
 
-: "${APK_BUILDER_SKILL_KEY:*** APK_BUILDER_SKILL_KEY is required}"
+if [ -z "$APK_BUILDER_SKILL_KEY" ]; then
+  echo "FATAL: the builder skill key env var must be set (export it; never commit it)" >&2
+  exit 1
+fi
 
 # --- 1. resolve tag -> commit + versionName ------------------
 OWNER_REPO="$(git remote get-url origin | sed -E 's#(https?://|git@)github\.com[:/]##; s#\.git$##')"
@@ -47,7 +50,10 @@ case "$CODE" in (*[!0-9]*|'') echo "FATAL: versionCode must be an integer" >&2; 
 echo "tag=$TAG commit=${COMMIT:0:12} versionName=$VERSION_NAME versionCode=$CODE"
 
 # --- 2. download the tag archive from GitHub -----------------
-WORK="$(mktemp -d)"
+# NOTE: a relative work dir — MSYS git-bash curl refuses to write to
+# /tmp/... paths (exit 23 or a 0-byte file) but relative paths work.
+WORK=".release-work"
+rm -rf "$WORK" && mkdir -p "$WORK"
 trap 'rm -rf "$WORK"' EXIT
 echo "downloading https://api.github.com/repos/$OWNER_REPO/tarball/$TAG ..."
 curl -sL -m 120 "https://api.github.com/repos/$OWNER_REPO/tarball/$TAG" -o "$WORK/tag.tar"
@@ -102,10 +108,20 @@ done
 echo "build completed"
 
 # --- 6. download the signed APK ------------------------------
+# The /download route is a 302 -> signed R2/Cloudflare URL, so follow
+# redirects (-L). Validate it's a real APK (a zip) and non-trivial size;
+# never trust the write blindly.
 OUT="handoff/nimbus-speedtest-${VERSION_NAME}-v${CODE}-signed.apk"
 mkdir -p handoff
-curl -s -m 180 "$BASE/api/v1/builds/$BID/download" -H "User-Agent: $UA" -H "X-API-Key: $APK_BUILDER_SKILL_KEY" -o "$OUT"
-echo "wrote $OUT ($(stat -c%s "$OUT") bytes)"
+curl -sL -m 300 "$BASE/api/v1/builds/$BID/download" \
+  -H "User-Agent: $UA" -H "X-API-Key: $APK_BUILDER_SKILL_KEY" -o "$OUT"
+SZ="$(stat -c%s "$OUT")"
+if [ ! -s "$OUT" ] || [ "$SZ" -lt 102400 ] || ! python3 -c "import sys,zipfile;z=zipfile.ZipFile(sys.argv[1]);sys.exit(0 if 'AndroidManifest.xml' in z.namelist() else 1)" "$OUT" 2>/dev/null; then
+  echo "FATAL: downloaded file is not a valid APK ($SZ bytes) — refusing to clobber a good release" >&2
+  rm -f "$OUT"
+  exit 1
+fi
+echo "wrote $OUT ($SZ bytes)"
 
 # --- 7. report + remind --------------------------------------
 sha256sum "$OUT"

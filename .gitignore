@@ -30,3 +30,6 @@ t_bearer.json
 *.iml
 .DS_Store
 Thumbs.db
+
+# --- release.sh scratch dir (cleaned on exit) ---
+.release-work/
