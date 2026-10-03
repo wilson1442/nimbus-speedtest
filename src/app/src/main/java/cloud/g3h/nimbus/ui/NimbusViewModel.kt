@@ -321,6 +321,34 @@ class NimbusViewModel(private val app: NimbusApp) : ViewModel() {
         runCatching { java.net.URI(url.trimEnd('/').replaceFirst("https://", "").replaceFirst("http://", "")).host }
             .getOrNull() ?: url
 
+    // ---------- Back / exit handling ----------
+    /**
+     * Set by a screen while a modal dialog is open; onBack() routes BACK
+     * to it first (dismiss the dialog) before navigating.
+     */
+    var dialogBack: (() -> Unit)? = null
+
+    /**
+     * TV-style BACK: walk the in-app hierarchy instead of exiting.
+     *   dialog open      -> dismiss the dialog
+     *   running test     -> cancel and go home
+     *   RESULTS/HISTORY/SETTINGS -> home
+     *   HOME             -> no-op: the app stays open (the launcher's
+     *                        HOME key is the way out; BACK never kills us)
+     */
+    fun onBack() {
+        if (history.value.confirmClear) {
+            dismissClearHistory()
+            return
+        }
+        dialogBack?.let { back -> back(); return }
+        when (screen.value) {
+            Screen.HOME -> Unit
+            Screen.TESTING -> cancelTest()
+            Screen.RESULTS, Screen.HISTORY, Screen.SETTINGS -> navigate(Screen.HOME)
+        }
+    }
+
     // ---------- Updates ----------
     fun checkForUpdates() {
         val cur = cloud.g3h.nimbus.BuildConfig.VERSION_CODE

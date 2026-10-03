@@ -27,6 +27,12 @@ fun SettingsScreen(
     val settings by vm.settings.collectAsState()
     var editing by remember { mutableStateOf<Pair<String, String>?>(null) }
 
+    // BACK closes an open settings dialog before doing anything else.
+    vm.dialogBack = if (editing != null) { { editing = null } } else null
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        onDispose { vm.dialogBack = null }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()

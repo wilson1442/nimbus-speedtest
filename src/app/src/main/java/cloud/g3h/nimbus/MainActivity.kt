@@ -2,6 +2,7 @@ package cloud.g3h.nimbus
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
@@ -33,6 +34,11 @@ class MainActivity : ComponentActivity() {
                     NimbusViewModel(app)
                 }
                 val screen by vm.screen.collectAsState()
+                // TV-style BACK: walk the in-app hierarchy (sub-screen -> Home,
+                // running test -> cancel, dialog -> dismiss). On the Home
+                // screen BACK is a no-op — the app stays open; the launcher's
+                // HOME key is the way out.
+                BackHandler { vm.onBack() }
                 androidx.compose.foundation.layout.Box(Modifier.fillMaxSize().background(Ground)) {
                     when (screen) {
                         Screen.HOME -> HomeScreen(vm = vm, modifier = Modifier.fillMaxSize())
