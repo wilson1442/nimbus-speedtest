@@ -5,7 +5,7 @@ Speed test for Android TV and phones — **Kotlin + Jetpack Compose**, LibreSpee
 | | |
 |---|---|
 | Package | `cloud.g3h.nimbus` |
-| Current release | v1.0.2 / versionCode 3 (see `handoff/RELEASE_RECORD.md`) |
+| Current release | v1.1.0 / versionCode 4 (see `handoff/RELEASE_RECORD.md`) |
 | minSdk / targetSdk | 24 / 35 |
 | Leanback / touchscreen | both optional (one APK for TV + phones) |
 | Engine | LibreSpeed protocol: `empty.php` ping/upload · `garbage.php` download |
@@ -56,10 +56,20 @@ The pipeline is **git-tag driven**:
    ./release.sh v1.0.3 4
    ```
 
-   `release.sh` downloads the tag archive from GitHub, packages `src/`, submits the builder build (appTypeId 9, keystore 7), polls to completion, and writes `handoff/nimbus-speedtest-1.0.3-v4-signed.apk`. It does **not** publish (ATV-Store-only, human-approved).
+   `release.sh` downloads the tag archive from GitHub, packages `src/`, submits the builder build (appTypeId 9, keystore 7), polls to completion, writes `handoff/nimbus-speedtest-1.0.3-v4-signed.apk`, **and publishes a GitHub Release** with the signed APK as an asset (the in-app update endpoint — see below). It does **not** call the builder publish route (ATV-Store-only, human-approved).
 4. Run the §10.1 gate on the downloaded APK (badging, apksigner, sha256, placeholder scan) and append evidence to `handoff/RELEASE_RECORD.md`.
 
 The public builder domain is behind Cloudflare: API calls need a browser-like `User-Agent` or they 403 (WAF 1010) — `release.sh` handles this.
+
+## Updates (no Play Store)
+
+Installed apps update themselves from **GitHub Releases** — this repo's release page *is* the distribution endpoint:
+
+- `release.sh` attaches the signed APK to the tag's GitHub Release (asset name `nimbus-speedtest-<version>-v<code>-signed.apk`) and writes a machine-readable `nimbus-versionCode=<code>` line into the release notes.
+- The app's **Settings → App update** row calls the public GitHub API (`GET /repos/wilson1442/nimbus-speedtest/releases/latest`), compares `versionCode`, downloads the APK in-app with progress, verifies it (zip + `AndroidManifest.xml`), and hands it to the system installer via a `FileProvider` URI.
+- No backend, no server, no Play Store. Unauthenticated API reads are limited to 60/hour/IP, which the app's check cadence stays well under.
+
+To push an update to devices: ship a new tag via the pipeline above. Devices pick it up the next time a user opens Settings → App update.
 
 ## Tests
 

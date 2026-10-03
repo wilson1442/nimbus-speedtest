@@ -153,14 +153,25 @@ nimbus-versionCode=$CODE
 EOF
 )"
   echo "publishing GitHub Release $TAG ..."
+  APK_NAME="nimbus-speedtest-${VERSION_NAME}-v${CODE}-signed.apk"
   if command -v gh >/dev/null 2>&1; then
-    # gh CLI path (auth already configured)
-    gh release view "$TAG" >/dev/null 2>&1 \
-      && gh release delete "$TAG" --yes --cleanup-tag=false 2>/dev/null || true
-    gh release create "$TAG" "$OUT" \
-      --title "Nimbus Speed Test $TAG" \
-      --notes "$BODY" \
-      --target "$COMMIT"
+    # gh CLI path (auth already configured). The API occasionally returns a
+    # transient 500 on create — retry a few times, then VERIFY the release
+    # actually exists (a claimed upload is not a published release).
+    for attempt in 1 2 3; do
+      if gh release view "$TAG" >/dev/null 2>&1; then
+        # release already exists (re-run): replace it
+        gh release delete "$TAG" --yes --cleanup-tag=false
+      fi
+      if gh release create "$TAG" "$OUT" \
+        --title "Nimbus Speed Test $TAG" \
+        --notes "$BODY" \
+        --target "$COMMIT"; then
+        break
+      fi
+      echo "attempt $attempt failed (transient API error?), retrying in 5s ..."
+      sleep 5
+    done
   else
     # token-only path (no gh binary): raw GitHub API
     gha() {  # gha <method> <path> [json-body]
@@ -187,12 +198,22 @@ except Exception: print("")' 2>/dev/null || true)"
       [ -n "$RID" ] || { echo "FATAL: release create failed" >&2; exit 1; }
     fi
     # upload the APK asset (multipart)
-    ASSET_URL="https://uploads.github.com/repos/$OWNER_REPO/releases/${RID:-$EXISTING}/assets?name=nimbus-speedtest-${VERSION_NAME}-signed.apk"
+    ASSET_URL="https://uploads.github.com/repos/$OWNER_REPO/releases/${RID:-$EXISTING}/assets?name=$APK_NAME"
     curl -sL -m 120 "$ASSET_URL" \
       -X POST \
       -H "Authorization: Bearer $GITHUB_TOKEN" \
       -H "Content-Type: application/octet-stream" \
       --data-binary @"$OUT" >/dev/null
+  fi
+  # hard check: the app's feed is /releases/latest — confirm it resolves
+  LIVE="$(curl -sL -m 30 -H "User-Agent: $UA" \
+    "https://api.github.com/repos/$OWNER_REPO/releases/tags/$TAG" \
+    | python3 -c 'import sys,json
+try: print(json.load(sys.stdin).get("tag_name",""))
+except Exception: print("")' 2>/dev/null || true)"
+  if [ "$LIVE" != "$TAG" ]; then
+    echo "FATAL: GitHub Release $TAG is not live (transient API error?) — re-run the publish step" >&2
+    exit 1
   fi
   echo "release live: https://github.com/$OWNER_REPO/releases/tag/$TAG"
 fi
