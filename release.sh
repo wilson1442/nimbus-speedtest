@@ -23,16 +23,22 @@
 #    4. POST /api/v1/builds (appTypeId=9, keystoreId=7)
 #    5. poll GET /api/v1/builds/:id to a terminal state
 #    6. GET /api/v1/builds/:id/download -> handoff/<name>-v<CODE>-signed.apk
-#    7. print SHA-256 + remind: run the section 10.1 gate before shipping
+#    7. publish a GitHub Release with the APK as an asset (the in-app
+#       update endpoint). Needs `gh` auth or GITHUB_TOKEN; pass --no-publish
+#       to skip (the app's update check stays on the previous release).
+#    8. print SHA-256 + remind: run the section 10.1 gate before shipping
 #
-#  NOTE: this script submits and downloads only. It does NOT publish
-#  (publish is ATV-Store-only and human-approved, standard section 23).
+#  NOTE: "publish" here means a GitHub Release for in-app updates. It does
+#  NOT call the builder's publish route (ATV-Store-only, human-approved,
+#  standard section 23).
 # ============================================================
 set -euo pipefail
 
-TAG="${1:?usage: release.sh <tag> <versionCode> [builder-base-url]}"
-CODE="${2:?usage: release.sh <tag> <versionCode> [builder-base-url]}"
+TAG="${1:?usage: release.sh <tag> <versionCode> [builder-base-url] [--no-publish]}"
+CODE="${2:?usage: release.sh <tag> <versionCode> [builder-base-url] [--no-publish]}"
 BASE="${3:-https://apk.g3h.cloud}"
+NO_PUBLISH=0
+for a in "$@"; do [ "$a" = "--no-publish" ] && NO_PUBLISH=1; done
 UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
 
 if [ -z "$APK_BUILDER_SKILL_KEY" ]; then
@@ -123,7 +129,75 @@ if [ ! -s "$OUT" ] || [ "$SZ" -lt 102400 ] || ! python3 -c "import sys,zipfile;z
 fi
 echo "wrote $OUT ($SZ bytes)"
 
-# --- 7. report + remind --------------------------------------
+# --- 7. publish GitHub Release (in-app update endpoint) ------
+# The app checks GET /releases/latest on this repo and installs the
+# -signed.apk asset. The body carries a machine-readable versionCode
+# line (the GitHub API has no versionCode field of its own).
+if [ "$NO_PUBLISH" = "1" ]; then
+  echo "skip: --no-publish (the app will keep offering the previous release)"
+else
+  if ! command -v gh >/dev/null 2>&1 && [ -z "${GITHUB_TOKEN:-}" ]; then
+    echo "FATAL: publishing needs `gh` auth or GITHUB_TOKEN (or pass --no-publish)" >&2
+    exit 1
+  fi
+  TAGMSG="$(git tag -l --format='%(contents)' "$TAG" | head -20)"
+  SHA="$(sha256sum "$OUT" | cut -d' ' -f1)"
+  BODY="$(cat <<EOF
+$TAGMSG
+
+- APK: nimbus-speedtest-${VERSION_NAME}-signed.apk ($SZ bytes)
+- SHA-256: $SHA
+- Source: https://github.com/$OWNER_REPO/tree/$TAG
+
+nimbus-versionCode=$CODE
+EOF
+)"
+  echo "publishing GitHub Release $TAG ..."
+  if command -v gh >/dev/null 2>&1; then
+    # gh CLI path (auth already configured)
+    gh release view "$TAG" >/dev/null 2>&1 \
+      && gh release delete "$TAG" --yes --cleanup-tag=false 2>/dev/null || true
+    gh release create "$TAG" "$OUT" \
+      --title "Nimbus Speed Test $TAG" \
+      --notes "$BODY" \
+      --target "$COMMIT"
+  else
+    # token-only path (no gh binary): raw GitHub API
+    gha() {  # gha <method> <path> [json-body]
+      curl -sL -m 60 "https://api.github.com/repos/$OWNER_REPO$2" \
+        -X "$1" \
+        -H "Authorization: Bearer $GITHUB_TOKEN" \
+        -H "Accept: application/vnd.github+json" \
+        ${3:+-H "Content-Type: application/json" -d "$3"}
+    }
+    PAYLOAD="$(python3 - "$TAG" "$BODY" <<'PY'
+import json, sys
+tag, body = sys.argv[1], sys.argv[2]
+print(json.dumps({"name": f"Nimbus Speed Test {tag}", "tag_name": tag,
+                  "body": body, "draft": False, "prerelease": False}))
+PY
+)"
+    EXISTING="$(gha GET "/releases/tags/$TAG" | python3 -c 'import sys,json
+try: print(json.load(sys.stdin).get("id",""))
+except Exception: print("")' 2>/dev/null || true)"
+    if [ -n "$EXISTING" ]; then
+      gha PATCH "/releases/$EXISTING" "$PAYLOAD" >/dev/null
+    else
+      RID="$(gha POST /releases "$PAYLOAD" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("id",""))' 2>/dev/null || true)"
+      [ -n "$RID" ] || { echo "FATAL: release create failed" >&2; exit 1; }
+    fi
+    # upload the APK asset (multipart)
+    ASSET_URL="https://uploads.github.com/repos/$OWNER_REPO/releases/${RID:-$EXISTING}/assets?name=nimbus-speedtest-${VERSION_NAME}-signed.apk"
+    curl -sL -m 120 "$ASSET_URL" \
+      -X POST \
+      -H "Authorization: Bearer $GITHUB_TOKEN" \
+      -H "Content-Type: application/octet-stream" \
+      --data-binary @"$OUT" >/dev/null
+  fi
+  echo "release live: https://github.com/$OWNER_REPO/releases/tag/$TAG"
+fi
+
+# --- 8. report + remind --------------------------------------
 sha256sum "$OUT"
 echo
 echo "DONE. Before shipping, run the section 10.1 gate on $OUT:"

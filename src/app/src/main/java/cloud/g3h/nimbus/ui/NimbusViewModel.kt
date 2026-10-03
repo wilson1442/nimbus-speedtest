@@ -10,6 +10,7 @@ import cloud.g3h.nimbus.engine.SpeedProgress
 import cloud.g3h.nimbus.net.ConnectionMonitor
 import cloud.g3h.nimbus.net.ConnectionState
 import cloud.g3h.nimbus.net.SettingsStore
+import cloud.g3h.nimbus.net.UpdateChecker
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -59,7 +60,12 @@ data class SettingsUiState(
     val serverUrl: String = "",
     val ipLookupUrl: String = "",
     val shortDuration: Boolean = false,
-    val versionName: String = "1.0.0"
+    val versionName: String = "1.0.0",
+    // update-check state
+    val updateStatus: UpdateChecker.Status = UpdateChecker.Status.IDLE,
+    val updateInfo: UpdateChecker.UpdateInfo? = null,
+    val updateError: String? = null,
+    val downloadPct: Int = -1
 )
 
 class NimbusViewModel(private val app: NimbusApp) : ViewModel() {
@@ -314,6 +320,61 @@ class NimbusViewModel(private val app: NimbusApp) : ViewModel() {
     private fun hostOf(url: String): String =
         runCatching { java.net.URI(url.trimEnd('/').replaceFirst("https://", "").replaceFirst("http://", "")).host }
             .getOrNull() ?: url
+
+    // ---------- Updates ----------
+    fun checkForUpdates() {
+        val cur = cloud.g3h.nimbus.BuildConfig.VERSION_CODE
+        settings.update { it.copy(updateStatus = UpdateChecker.Status.CHECKING, updateError = null) }
+        UpdateChecker.checkNow { status, info, err ->
+            when {
+                status == UpdateChecker.Status.ERROR ->
+                    settings.update { it.copy(updateStatus = status, updateError = err, updateInfo = null, downloadPct = -1) }
+                info != null && info.versionCode > cur ->
+                    settings.update { it.copy(updateStatus = UpdateChecker.Status.AVAILABLE, updateInfo = info, updateError = null, downloadPct = -1) }
+                else ->
+                    settings.update { it.copy(updateStatus = UpdateChecker.Status.UP_TO_DATE, updateInfo = null, updateError = null, downloadPct = -1) }
+            }
+        }
+    }
+
+    fun downloadUpdate() {
+        val info = settings.value.updateInfo ?: return
+        settings.update { it.copy(updateStatus = UpdateChecker.Status.DOWNLOADING, downloadPct = 0) }
+        UpdateChecker.download(app.applicationContext, info) { pct ->
+            when {
+                pct == 100 -> settings.update { it.copy(updateStatus = UpdateChecker.Status.READY, downloadPct = 100) }
+                pct >= 0 -> settings.update { it.copy(downloadPct = pct) }
+                else -> settings.update { it.copy(updateStatus = UpdateChecker.Status.ERROR, updateError = "Download failed. Try again.", downloadPct = -1) }
+            }
+        }
+    }
+
+    /** Hands the cached APK to the system installer (FileProvider URI). */
+    fun installUpdate() {
+        val info = settings.value.updateInfo ?: return
+        val file = UpdateChecker.cachedApk(app.applicationContext, info) ?: return
+        val uri = androidx.core.content.FileProvider.getUriForFile(
+            app.applicationContext,
+            "${app.applicationContext.packageName}.fileprovider",
+            file
+        )
+        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
+            .setDataAndType(uri, "application/vnd.android.package-archive")
+            .addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+        try {
+            app.applicationContext.startActivity(intent)
+        } catch (e: Exception) {
+            // No chooser on some TV boxes — fall back to the release page in a browser.
+            runCatching {
+                app.applicationContext.startActivity(
+                    android.content.Intent(
+                        android.content.Intent.ACTION_VIEW,
+                        android.net.Uri.parse("https://github.com/wilson1442/nimbus-speedtest/releases")
+                    ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+            }
+        }
+    }
 
     override fun onCleared() {
         super.onCleared()

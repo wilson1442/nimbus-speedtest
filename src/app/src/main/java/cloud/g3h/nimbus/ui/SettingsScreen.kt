@@ -100,6 +100,7 @@ fun SettingsScreen(
                     WarnButton("Clear history", onClick = { vm.askClearHistory() }, icon = { TrashIcon(WarnText, it) }, sizeSp = 9.5f)
                 }
             )
+            UpdateRow(settings = settings, vm = vm)
             Spacer(Modifier.weight(1f))
             SettingsRow(
                 label = "About",
@@ -235,4 +236,81 @@ private fun TextEntryDialog(
         }
     }
     LaunchedEffect(Unit) { doneFocus.requestFocus() }
+}
+
+/**
+ * In-app update row (GitHub Releases feed).
+ * IDLE → "Check"; AVAILABLE → "Download"; DOWNLOADING → progress;
+ * READY → "Install"; UP_TO_DATE / ERROR → status line + retry.
+ */
+@Composable
+private fun UpdateRow(settings: SettingsUiState, vm: NimbusViewModel) {
+    val status = settings.updateStatus
+    val info = settings.updateInfo
+    val sizeText = String.format(
+        java.util.Locale.getDefault(), "%.1f MB", (info?.assetSize ?: 0L) / 1_048_576.0
+    )
+    val highlighted = status == cloud.g3h.nimbus.net.UpdateChecker.Status.AVAILABLE ||
+        status == cloud.g3h.nimbus.net.UpdateChecker.Status.READY
+
+    val sub = when (status) {
+        cloud.g3h.nimbus.net.UpdateChecker.Status.IDLE -> "Check for new versions (GitHub Releases)"
+        cloud.g3h.nimbus.net.UpdateChecker.Status.CHECKING -> "Checking for updates…"
+        cloud.g3h.nimbus.net.UpdateChecker.Status.AVAILABLE ->
+            "v${info?.tagName?.trimStart('v') ?: "?"} is available · $sizeText"
+        cloud.g3h.nimbus.net.UpdateChecker.Status.DOWNLOADING -> "Downloading… ${settings.downloadPct}%"
+        cloud.g3h.nimbus.net.UpdateChecker.Status.READY -> "Downloaded · $sizeText — install when ready"
+        cloud.g3h.nimbus.net.UpdateChecker.Status.UP_TO_DATE ->
+            "You're on the latest version (v${settings.versionName})"
+        cloud.g3h.nimbus.net.UpdateChecker.Status.ERROR ->
+            settings.updateError ?: "Update check failed"
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(if (highlighted) Tint else Surface, RoundedCornerShape(14.dp))
+            .border(1.dp, if (highlighted) CardBorderActive else Line, RoundedCornerShape(14.dp))
+            .padding(horizontal = 22.dp, vertical = 13.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            SectionLabel("App update")
+            Text(sub, fontSize = 10.5.sp, color = Ink, fontFamily = ChakraPetch)
+        }
+        Spacer(Modifier.width(16.dp))
+        when (status) {
+            cloud.g3h.nimbus.net.UpdateChecker.Status.IDLE ->
+                SecondaryButton("Check", onClick = { vm.checkForUpdates() }, sizeSp = 10f)
+            cloud.g3h.nimbus.net.UpdateChecker.Status.CHECKING -> Unit
+            cloud.g3h.nimbus.net.UpdateChecker.Status.AVAILABLE ->
+                PrimaryButton("Download", onClick = { vm.downloadUpdate() }, sizeSp = 10f)
+            cloud.g3h.nimbus.net.UpdateChecker.Status.DOWNLOADING ->
+                ProgressPill(settings.downloadPct)
+            cloud.g3h.nimbus.net.UpdateChecker.Status.READY ->
+                PrimaryButton("Install", onClick = { vm.installUpdate() }, sizeSp = 10f)
+            cloud.g3h.nimbus.net.UpdateChecker.Status.UP_TO_DATE -> Unit
+            cloud.g3h.nimbus.net.UpdateChecker.Status.ERROR ->
+                SecondaryButton("Retry", onClick = { vm.checkForUpdates() }, sizeSp = 10f)
+        }
+    }
+}
+
+@Composable
+private fun ProgressPill(pct: Int, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .width(90.dp)
+            .height(8.dp)
+            .background(NeutralPill, RoundedCornerShape(999.dp))
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth((pct.coerceIn(0, 100) / 100f))
+                .background(Blue, RoundedCornerShape(999.dp))
+        )
+    }
 }

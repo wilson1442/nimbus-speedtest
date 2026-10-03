@@ -24,8 +24,8 @@ android {
         applicationId = "cloud.g3h.nimbus"
         minSdk = 24
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.0.2"
+        versionCode = 4
+        versionName = "1.1.0"
         // BuildConfig.API_BASE_URL: default speed-test server baked at build
         // time (NYC Clouvider LibreSpeed backend; user can override in Settings).
         buildConfigField(
@@ -93,4 +93,7 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+    // Real org.json for JVM unit tests (Android's bundled copy is a stub
+    // that throws at runtime under the plain JUnit runner).
+    testImplementation("org.json:json:20240303")
 }
