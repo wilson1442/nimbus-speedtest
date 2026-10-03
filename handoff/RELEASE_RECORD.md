@@ -10,7 +10,7 @@
 | Keystore | id=7, name "nimbus", alias `nimbus-key` (created 2026-10-03 14:03) |
 | Builder buildId | **8bc85e33-328b-4fea-af65-af2b43aeee56** (current) · 0e5c4e26-43bd-452b-b724-36b3107a490b (v1.0.1) · da74e82f-24f7-44ee-a05a-56ee49999d47 (v1.0.0) |
 | App type | id=9 "Nimbus Speed Test" (created 2026-10-03 via skill-key `POST /api/v1/app-types`, defaultPackage cloud.g3h.nimbus, no template — archive-driven; note: `appName` form field is REQUIRED on `POST /api/v1/builds` or the API returns 400) |
-| Source | local clean archive `handoff/nimbus-source-v3.zip` (52 files, 367,997 bytes; excludes .git/.gradle/.kotlin/build/local.properties/APKs) — no git commit exists for this project |
+| Source | git repo `wilson1442/nimbus-speedtest` @ `main` (commit `e602470`, v1.0.2) — previous releases were archive-driven: `nimbus-source-v3.zip` (v1.0.2), `nimbus-source-v2.zip` (v1.0.1), `nimbus-source-v1.zip` (v1.0.0) |
 | Build status | completed (33,637ms recorded) |
 | Built at | 2026-10-03 18:18:24 → 18:18:59 (builder local time) |
 | APK SHA-256 | **e91c7b73fbf2e61360b47dc98e3743d285f805d1d070c8a3de909ac317996060** (current) · bf7523399ee0edf18ffaf408b71f24a2904c5fb8d0359837f9a407085b60508a (v1.0.1) · b575d33c11d53e3415e79a4914dea2e4ee19bf6c872d4d3c8d95fb993c7089d7 (v1.0.0) |
@@ -30,6 +30,7 @@
 | App code | MainActivity, LibreSpeedEngine, HomeScreen present in classes2.dex |
 | Local gate | assembleDebug EXIT=0; unit tests pass (10/10 PingMath + LiveEmissionTest) |
 | Publication | NOT published — publish route is ATV-Store-only and human-approved (standard §23). Hand-off for sideloading. |
+| Source repo | `https://github.com/wilson1442/nimbus-speedtest` (public, `main`) — local path `F:\hermes-work\coder\nimbus-speedtest`; release keystore is NOT in the repo (apk-builder holds it) |
 
 ## v1.0.2 change (2026-10-03) — realtime bandwidth display
 
