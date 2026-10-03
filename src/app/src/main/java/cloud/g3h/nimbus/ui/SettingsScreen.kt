@@ -25,6 +25,7 @@ fun SettingsScreen(
     modifier: Modifier = Modifier
 ) {
     val settings by vm.settings.collectAsState()
+    val probe by vm.probe.collectAsState()
     var editing by remember { mutableStateOf<Pair<String, String>?>(null) }
 
     // BACK closes an open settings dialog before doing anything else.
@@ -69,6 +70,15 @@ fun SettingsScreen(
                 sub = if (settings.serverUrl.isBlank()) "Not set — required to run a test"
                 else settings.serverUrl,
                 trailing = {
+                    if (vm.probe.value.checking) {
+                        Text("Testing…", fontSize = 9.sp, color = Ink2)
+                    } else if (vm.probe.value.ok) {
+                        Text("Reachable · ${fmt(vm.probe.value.bestMs, 0)} ms", fontSize = 9.sp, color = Ink)
+                    } else if (vm.probe.value.error != null) {
+                        Text(vm.probe.value.error ?: "unreachable", fontSize = 9.sp, color = WarnText)
+                    }
+                    SecondaryButton("Test", onClick = { vm.testServer() }, sizeSp = 9f)
+                    Spacer(Modifier.width(8.dp))
                     SecondaryButton("Edit", onClick = { editing = "server" to settings.serverUrl }, sizeSp = 10f)
                 }
             )

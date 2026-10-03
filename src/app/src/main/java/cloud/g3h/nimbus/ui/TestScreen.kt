@@ -145,14 +145,25 @@ fun TestScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(48.dp)
             ) {
-                // left: live metrics
+                // left: live metrics — the latency cluster is ALWAYS present so
+                // ping never "disappears" once the ping phase ends.
                 Column(
-                    modifier = Modifier.width(150.dp),
+                    modifier = Modifier.width(158.dp),
                     verticalArrangement = Arrangement.spacedBy(9.dp)
                 ) {
-                    MetricCard("Peak", fmt(test.peakMbps, 1), "Mbps")
+                    val pingLabel = when (test.phase) {
+                        cloud.g3h.nimbus.data.Phase.PING -> "ms · live"
+                        else -> "ms · final"
+                    }
+                    LatencyCard(
+                        value = if (test.pingMs > 0.0) fmt(test.pingMs, 1) else "—",
+                        unit = pingLabel,
+                        active = test.phase == cloud.g3h.nimbus.data.Phase.PING,
+                        failed = test.pingMs <= 0.0 && test.phase != cloud.g3h.nimbus.data.Phase.PING
+                    )
                     MetricCard("Jitter", fmt(test.jitterMs, 1), "ms")
                     MetricCard("Packet loss", fmt(test.lossPct, 1), "%")
+                    MetricCard("Peak", fmt(test.peakMbps, 1), "Mbps")
                 }
 
                 // centre gauge
@@ -179,7 +190,11 @@ fun TestScreen(
                         label = "PING",
                         done = test.pingDone,
                         active = test.phase == cloud.g3h.nimbus.data.Phase.PING,
-                        text = if (test.pingDone || test.phase == cloud.g3h.nimbus.data.Phase.PING) "${fmt(test.pingMs, 0)} ms" else "Waiting"
+                        text = when {
+                            test.pingMs > 0.0 -> "${fmt(test.pingMs, 0)} ms"
+                            test.phase == cloud.g3h.nimbus.data.Phase.PING -> "Measuring…"
+                            else -> "Unreached — ${test.pingError ?: "see results"}"
+                        }
                     )
                     PhaseStep(
                         label = "DOWNLOAD",
@@ -254,6 +269,38 @@ private fun MetricCard(label: String, value: String, unit: String) {
         Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
             Text(value, style = NumberStyle(17f, Ink))
             Text(unit, fontSize = 9.sp, fontWeight = FontWeight.Medium, color = Ink2, fontFamily = Oxanium)
+        }
+    }
+}
+
+/**
+ * The always-visible ping card. Unlike [MetricCard] it is tinted so latency
+ * reads as a first-class metric, and it flags the unmeasured case in the
+ * accent colour instead of a dim em-dash.
+ */
+@Composable
+private fun LatencyCard(value: String, unit: String, active: Boolean, failed: Boolean) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(if (active) Tint else (if (failed) WarnBg else Surface), RoundedCornerShape(12.dp))
+            .border(
+                if (failed) 1.2.dp else 1.dp,
+                if (failed) WarnBorder else (if (active) Blue else Line),
+                RoundedCornerShape(12.dp)
+            )
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(3.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+            SectionLabel("Ping")
+            if (failed) {
+                Text("not measured", fontSize = 7.5.sp, fontWeight = FontWeight.SemiBold, color = WarnText, fontFamily = ChakraPetch)
+            }
+        }
+        Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+            Text(value, style = NumberStyle(19f, if (failed) WarnText else Ink))
+            Text(unit, fontSize = 9.sp, fontWeight = FontWeight.Medium, color = if (failed) WarnText else Ink2, fontFamily = Oxanium)
         }
     }
 }
@@ -415,7 +462,9 @@ fun Gauge(phase: cloud.g3h.nimbus.data.Phase, value: Double, unit: String, isPin
             }
             Spacer(Modifier.height(2.dp))
             Text(
-                if (isPing) fmt(value, 0) else fmt(value, 1),
+                if (isPing) {
+                    if (value > 0.0) fmt(value, 0) else "—"
+                } else fmt(value, 1),
                 style = NumberStyle(54f, Ink)
             )
             Text(unit, fontSize = 13.sp, fontWeight = FontWeight.Medium, color = Ink2, fontFamily = ChakraPetch)
@@ -428,7 +477,7 @@ fun Gauge(phase: cloud.g3h.nimbus.data.Phase, value: Double, unit: String, isPin
         ) {
             Text("0", style = NumberStyle(8f, Ink2), modifier = Modifier.weight(1f))
             Text(
-                "1000",
+                if (isPing) "300" else "1000",
                 style = NumberStyle(8f, Ink2),
                 modifier = Modifier.weight(1f),
                 textAlign = androidx.compose.ui.text.style.TextAlign.End

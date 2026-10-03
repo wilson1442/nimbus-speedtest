@@ -51,7 +51,9 @@ class LibreSpeedEngine(
             var peak = 0.0
             var progress = SpeedProgress(elapsedMs = 0)
             var pingMs = 0.0; var jitterMs = 0.0; var lossPct = 0.0
+            var minPing = 0.0
             var downMean = 0.0; var upMean = 0.0
+            var pingFailReason: String? = null
 
             try {
                 // ---------------- PING ----------------
@@ -61,11 +63,16 @@ class LibreSpeedEngine(
                     raw.add(timeGet("$base/empty.php"))
                     val m = PingMath.compute(raw)
                     raw.last()?.let { pingSamples.add(it) }
+                    if (raw.last() == null) pingFailReason = lastPingError
                     pingMs = m.pingMs; jitterMs = m.jitterMs; lossPct = m.lossPct
+                    if (m.pingMs > 0.0) minPing = if (minPing == 0.0) m.pingMs else minOf(minPing, m.pingMs)
                     progress = progress.copy(
                         phase = Phase.PING,
                         pingMs = pingMs, jitterMs = jitterMs, lossPct = lossPct,
                         pingSamples = pingSamples.toList(),
+                        minPingMs = minPing,
+                        serverReachable = minPing > 0.0,
+                        pingError = pingFailReason,
                         elapsedMs = System.currentTimeMillis() - startedAt
                     )
                     producer.trySend(progress)
@@ -118,6 +125,9 @@ class LibreSpeedEngine(
                     done = true,
                     pingMs = pingMs, jitterMs = jitterMs, lossPct = lossPct,
                     downloadMbps = downMean, uploadMbps = upMean,
+                    minPingMs = minPing,
+                    serverReachable = minPing > 0.0,
+                    pingError = pingFailReason,
                     elapsedMs = System.currentTimeMillis() - startedAt
                 )
                 producer.trySend(progress)
@@ -204,6 +214,20 @@ class LibreSpeedEngine(
         return last
     }
 
+    private var lastPingError: String? = null
+
+    override suspend fun probeServer(serverBaseUrl: String): ServerProbe {
+        val base = serverBaseUrl.trimEnd('/')
+        var best = Double.MAX_VALUE
+        var lastError: String? = null
+        repeat(3) {
+            val t = timeGet("$base/empty.php")
+            if (t != null) best = minOf(best, t) else lastError = lastPingError
+        }
+        return if (best != Double.MAX_VALUE) ServerProbe(true, best, null)
+        else ServerProbe(false, 0.0, lastError ?: "unknown")
+    }
+
     private suspend fun timeGet(url: String): Double? =
         runCatching {
             val t0 = System.nanoTime()
@@ -212,5 +236,13 @@ class LibreSpeedEngine(
                 if (!it.isSuccessful) error("HTTP ${it.code}")
             }
             (System.nanoTime() - t0) / 1e6
-        }.getOrNull()
+        }.fold(
+            onSuccess = { lastPingError = null; it },
+            onFailure = { e ->
+                // Capture a human-usable reason so the UI can explain a zero ping
+                // instead of silently rendering "0 ms".
+                lastPingError = e.message ?: e::class.java.simpleName
+                null
+            }
+        )
 }

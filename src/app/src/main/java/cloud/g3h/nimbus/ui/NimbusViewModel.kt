@@ -34,6 +34,8 @@ data class TestUiState(
     val pingSamples: List<Double> = emptyList(),
     val downloadSamples: List<Double> = emptyList(),
     val uploadSamples: List<Double> = emptyList(),
+    val minPingMs: Double = 0.0,
+    val pingError: String? = null,
     val error: String? = null
 )
 
@@ -68,6 +70,14 @@ data class SettingsUiState(
     val downloadPct: Int = -1
 )
 
+/** Server reachability probe result (Settings → Test connection). */
+data class ProbeUiState(
+    val checking: Boolean = false,
+    val ok: Boolean = false,
+    val bestMs: Double = 0.0,
+    val error: String? = null
+)
+
 class NimbusViewModel(private val app: NimbusApp) : ViewModel() {
 
     private val db = app.database
@@ -93,6 +103,7 @@ class NimbusViewModel(private val app: NimbusApp) : ViewModel() {
 
     // ---- Settings ----
     val settings = MutableStateFlow(SettingsUiState())
+    val probe = MutableStateFlow(ProbeUiState())
 
     init {
         refreshHome()
@@ -165,6 +176,8 @@ class NimbusViewModel(private val app: NimbusApp) : ViewModel() {
                         pingMs = done.pingMs,
                         jitterMs = done.jitterMs,
                         packetLossPct = done.lossPct,
+                        minPingMs = done.minPingMs,
+                        peakMbps = done.peakMbps,
                         connectionType = connNow.connectionType,
                         vpnActive = connNow.vpnActive,
                         wanIp = connNow.wanIp,
@@ -179,6 +192,8 @@ class NimbusViewModel(private val app: NimbusApp) : ViewModel() {
                     pingMs = done.pingMs,
                     jitterMs = done.jitterMs,
                     packetLossPct = done.lossPct,
+                    minPingMs = done.minPingMs,
+                    peakMbps = done.peakMbps,
                     connectionType = connNow.connectionType,
                     vpnActive = connNow.vpnActive,
                     wanIp = connNow.wanIp,
@@ -198,6 +213,9 @@ class NimbusViewModel(private val app: NimbusApp) : ViewModel() {
                         pingSamples = done.pingSamples,
                         downloadSamples = done.downloadSamples,
                         uploadSamples = done.uploadSamples,
+                        minPingMs = done.minPingMs,
+                        peakMbps = done.peakMbps,
+                        pingError = if (done.minPingMs <= 0.0) done.pingError else null,
                         liveMbps = done.uploadMbps,
                         downloadMbps = done.downloadMbps,
                         uploadMbps = done.uploadMbps)
@@ -237,7 +255,9 @@ class NimbusViewModel(private val app: NimbusApp) : ViewModel() {
                 uploadDone = p.uploadSamples.isNotEmpty(),
                 pingSamples = p.pingSamples,
                 downloadSamples = p.downloadSamples,
-                uploadSamples = p.uploadSamples
+                uploadSamples = p.uploadSamples,
+                minPingMs = p.minPingMs,
+                pingError = if (p.minPingMs <= 0.0) p.pingError else null
             )
         }
     }
@@ -315,6 +335,22 @@ class NimbusViewModel(private val app: NimbusApp) : ViewModel() {
         val v = !settings.value.shortDuration
         settings.update { it.copy(shortDuration = v) }
         viewModelScope.launch { SettingsStore.setShortDuration(app.applicationContext, v) }
+    }
+
+    /** Probes the configured server (or a candidate) — why the ping phase fails. */
+    fun testServer(candidateUrl: String? = null) {
+        val url = (candidateUrl ?: settings.value.serverUrl).trim()
+        if (url.isBlank()) {
+            probe.value = ProbeUiState(ok = false, error = "No server entered")
+            return
+        }
+        probe.value = ProbeUiState(checking = true)
+        viewModelScope.launch {
+            val p = runCatching { engine.probeServer(url) }.getOrElse {
+                cloud.g3h.nimbus.engine.ServerProbe(false, 0.0, it.message ?: "probe failed")
+            }
+            probe.value = ProbeUiState(ok = p.ok, bestMs = p.bestMs, error = p.error)
+        }
     }
 
     private fun hostOf(url: String): String =

@@ -18,7 +18,10 @@ data class SpeedProgress(
     val downloadSamples: List<Double> = emptyList(),
     val uploadSamples: List<Double> = emptyList(),
     val downloadMbps: Double = 0.0,
-    val uploadMbps: Double = 0.0
+    val uploadMbps: Double = 0.0,
+    val minPingMs: Double = 0.0,
+    val serverReachable: Boolean = false,
+    val pingError: String? = null
 )
 
 /**
@@ -27,7 +30,22 @@ data class SpeedProgress(
  */
 interface SpeedTestEngine {
     fun run(serverBaseUrl: String, shortTest: Boolean): kotlinx.coroutines.flow.Flow<SpeedProgress>
+
+    /**
+     * Probes [serverBaseUrl] for reachability: 3 sequential empty.php
+     * round-trips. Returns (ok, bestMs, errorReason) where errorReason
+     * explains the failure (timeout, connection refused, DNS, HTTP code…) so
+     * the UI can tell the user *why* instead of a blank failure.
+     */
+    suspend fun probeServer(serverBaseUrl: String): ServerProbe
 }
+
+/** Outcome of a server reachability probe. */
+data class ServerProbe(
+    val ok: Boolean,
+    val bestMs: Double,
+    val error: String?
+)
 
 /** Final numbers of a completed run (before persistence). */
 data class TestOutcome(
@@ -36,7 +54,9 @@ data class TestOutcome(
     val pingMs: Double,
     val jitterMs: Double,
     val packetLossPct: Double,
+    val minPingMs: Double,
     val pingSamples: List<Double>,
     val downloadSamples: List<Double>,
-    val uploadSamples: List<Double>
+    val uploadSamples: List<Double>,
+    val peakMbps: Double = 0.0
 )

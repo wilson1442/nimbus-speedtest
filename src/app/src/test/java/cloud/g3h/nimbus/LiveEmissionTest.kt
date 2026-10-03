@@ -43,23 +43,37 @@ class LiveEmissionTest {
         var upEmits = 0
         var sawDownLive = false
         var sawUpLive = false
+        var sawPing = false
+        var finalPing = 0.0
+        var finalMin = 0.0
+        var finalLoss = 0.0
         val phases = sortedSetOf<String>()
         withTimeout(120_000) {
             engine.run(base, shortTest = true).collect { p ->
                 phases += p.phase.toString()
+                if (p.pingMs > 0.0) sawPing = true
                 when (p.phase.toString()) {
                     "DOWNLOAD" -> { downEmits++; if (p.liveMbps > 0) sawDownLive = true }
                     "UPLOAD" -> { upEmits++; if (p.liveMbps > 0) sawUpLive = true }
                 }
+                if (p.done) {
+                    finalPing = p.pingMs
+                    finalMin = p.minPingMs
+                    finalLoss = p.lossPct
+                }
             }
         }
-        println("PHASES=$phases downEmits=$downEmits upEmits=$upEmits sawDownLive=$sawDownLive sawUpLive=$sawUpLive")
+        println("PHASES=$phases downEmits=$downEmits upEmits=$upEmits sawDownLive=$sawDownLive sawUpLive=$sawUpLive sawPing=$sawPing finalPing=$finalPing minPing=$finalMin loss=$finalLoss")
         assertTrue("saw DOWNLOAD phase", phases.contains("DOWNLOAD"))
         assertTrue("saw UPLOAD phase", phases.contains("UPLOAD"))
         assertTrue("download phase emitted live progress (got $downEmits)", downEmits >= 3)
         assertTrue("upload phase emitted live progress (got $upEmits)", upEmits >= 2)
         assertTrue("download liveMbps > 0 observed", sawDownLive)
         assertTrue("upload liveMbps > 0 observed", sawUpLive)
+        assertTrue("ping was measured live (sawPing=$sawPing)", sawPing)
+        assertTrue("final ping > 0 (got $finalPing)", finalPing > 0)
+        assertTrue("final minPing > 0 and <= ping (min=$finalMin, ping=$finalPing)", finalMin > 0 && finalMin <= finalPing + 0.0001)
+        assertTrue("no packet loss (got $finalLoss%)", finalLoss < 100.0)
         assertFalse("no error phase", phases.contains("ERROR"))
     }
 }

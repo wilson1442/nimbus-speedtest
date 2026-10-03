@@ -196,7 +196,7 @@ fun HomeScreen(
                     Spacer(Modifier.width(24.dp))
                     FooterStat("Upload", fmt(l.uploadMbps, 1), "Mbps")
                     Spacer(Modifier.width(24.dp))
-                    FooterStat("Ping", fmt(l.pingMs, 0), "ms")
+                    FooterStat("Ping", if (l.pingMs > 0.0) fmt(l.pingMs, 1) else "—", "ms")
                 }
             } else {
                 Row(

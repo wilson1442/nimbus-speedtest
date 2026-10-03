@@ -13,6 +13,8 @@ data class TestResult(
     @ColumnInfo(name = "ping_ms") val pingMs: Double,
     @ColumnInfo(name = "jitter_ms") val jitterMs: Double,
     @ColumnInfo(name = "packet_loss_pct") val packetLossPct: Double,
+    @ColumnInfo(name = "min_ping_ms") val minPingMs: Double,
+    @ColumnInfo(name = "peak_mbps") val peakMbps: Double = 0.0,
     @ColumnInfo(name = "connection_type") val connectionType: String,
     @ColumnInfo(name = "vpn_active") val vpnActive: Boolean,
     @ColumnInfo(name = "wan_ip") val wanIp: String?,

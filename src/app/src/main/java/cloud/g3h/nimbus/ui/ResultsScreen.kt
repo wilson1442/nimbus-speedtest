@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Text
 import cloud.g3h.nimbus.data.TestResult
+import cloud.g3h.nimbus.engine.QualityScore
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -47,11 +48,12 @@ fun ResultsScreen(
     val samples = rs!!
 
     val headline = when {
-        r.downloadMbps >= 100 && r.pingMs <= 40 -> "Your connection is running strong"
+        r.downloadMbps >= 100 && r.pingMs in 1.0..40.0 -> "Your connection is running strong"
         r.downloadMbps >= 25 -> "Solid connection — ready for 4K"
         r.downloadMbps >= 5 -> "Usable, but not for heavy streaming"
         else -> "Slow connection detected"
     }
+    val pingFailed = r.pingMs <= 0.0
 
     Column(
         modifier = modifier
@@ -120,6 +122,42 @@ fun ResultsScreen(
 
         Spacer(Modifier.height(14.dp))
 
+        // ping-failure diagnostic (every ping sample failed → 0 ms is not a speed, explain why)
+        if (pingFailed) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(WarnBg, RoundedCornerShape(13.dp))
+                    .border(1.dp, WarnBorder, RoundedCornerShape(13.dp))
+                    .padding(horizontal = 16.dp, vertical = 11.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                InfoCircleIcon(tint = WarnText, modifier = Modifier.size(15.dp))
+                Spacer(Modifier.width(11.dp))
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text("Ping could not be measured", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = WarnText, fontFamily = ChakraPetch)
+                    Text(
+                        "All 10 latency samples to ${r.serverName} failed — likely the server is unreachable from this TV, or its TLS handshake is timing out. Upload/download below were reached. In Settings, try a different speed-test server, check the TV's date/time & DNS, or test on another device on the same network to isolate it.",
+                        fontSize = 9.sp, color = WarnText, fontFamily = ChakraPetch
+                    )
+                }
+            }
+            Spacer(Modifier.height(14.dp))
+        }
+
+        // connection-quality hero: the headline latency number (median ping in ms,
+        // always visible) plus min/max, jitter, loss, and a 0-100 grade.
+        val maxPing = samples.pingSamples.maxOrNull() ?: 0.0
+        QualityHero(
+            score = QualityScore.score(r.downloadMbps, r.uploadMbps, r.pingMs, r.jitterMs, r.packetLossPct),
+            pingMs = r.pingMs,
+            minPingMs = if (r.minPingMs > 0.0) r.minPingMs else (samples.pingSamples.minOrNull() ?: 0.0),
+            maxPingMs = if (maxPing > 0.0) maxPing else (samples.pingSamples.maxOrNull() ?: 0.0),
+            jitterMs = r.jitterMs,
+            lossPct = r.packetLossPct
+        )
+        Spacer(Modifier.height(14.dp))
+
         // three cards
         Row(
             modifier = Modifier.fillMaxWidth().weight(1f),
@@ -129,7 +167,7 @@ fun ResultsScreen(
                 modifier = Modifier.weight(1f),
                 label = "DOWNLOAD",
                 value = fmt(r.downloadMbps, 1),
-                unit = "Mbps",
+                unit = if (r.peakMbps > 0.0 && r.peakMbps > r.downloadMbps) "Mbps · peak ${fmt(r.peakMbps, 1)}" else "Mbps sustained",
                 delta = deltaPill(avg?.avgDownloadMbps, r.downloadMbps, "vs avg", lowerIsBetter = false),
                 samples = samples.downloadSamples,
                 lineColor = Blue,
@@ -147,9 +185,13 @@ fun ResultsScreen(
             ResultCard(
                 modifier = Modifier.weight(1f),
                 label = "PING",
-                value = fmt(r.pingMs, 0),
-                unit = "ms · jitter ${fmt(r.jitterMs, 1)} ms · loss ${fmt(r.packetLossPct, 0)}%",
-                delta = deltaPill(avg?.avgPingMs, r.pingMs, "vs avg", lowerIsBetter = true),
+                value = if (r.pingMs > 0.0) fmt(r.pingMs, 1) else "—",
+                unit = if (r.minPingMs > 0.0 || r.pingMs > 0.0) {
+                    val mn = if (r.minPingMs > 0.0) r.minPingMs else (samples.pingSamples.minOrNull() ?: r.pingMs)
+                    val mx = samples.pingSamples.maxOrNull() ?: r.pingMs
+                    "ms · min ${fmt(mn, 1)} · max ${fmt(mx, 1)} · jitter ${fmt(r.jitterMs, 1)}"
+                } else "latency not measured",
+                delta = if (r.pingMs > 0.0) deltaPill(avg?.avgPingMs, r.pingMs, "vs avg", lowerIsBetter = true) else null,
                 samples = samples.pingSamples,
                 lineColor = BlueSoft
             )
@@ -165,7 +207,7 @@ fun ResultsScreen(
             SectionLabel("Good for")
             Spacer(Modifier.width(4.dp))
             GoodForChip("4K HDR streaming", r.downloadMbps >= 25) { TvIcon(it) }
-            GoodForChip("Online gaming", r.pingMs <= 40 && r.jitterMs <= 10) { GameIcon(it) }
+            GoodForChip("Online gaming", r.pingMs > 0 && r.pingMs <= 40 && r.jitterMs <= 10) { GameIcon(it) }
             GoodForChip("Video calls", r.uploadMbps >= 5) { VideoIcon(it) }
             GoodForChip("Multiple devices", r.downloadMbps >= 100) { DevicesIcon(it) }
         }
@@ -203,6 +245,80 @@ private fun deltaPill(avg: Double?, value: Double, suffix: String, lowerIsBetter
     val sign = if (pct >= 0) "+" else "−"
     val text = if (Math.abs(pct) < 1) "±0% $suffix" else "${sign}${Math.abs(pct).toInt()}% $suffix"
     return text to positive
+}
+
+/**
+ * Connection-quality hero (Results): makes the *latency* a first-class,
+ * always-visible number. Left: median ping in ms (or a clear "not measured"),
+ * flanked by min/max. Right: a 0-100 score + grade. Jitter and loss ride
+ * along as the small latency context. Color-coded by grade.
+ */
+@Composable
+fun QualityHero(
+    score: cloud.g3h.nimbus.engine.QualityScore.Report,
+    pingMs: Double,
+    minPingMs: Double,
+    maxPingMs: Double,
+    jitterMs: Double,
+    lossPct: Double,
+    modifier: Modifier = Modifier
+) {
+    val pinged = pingMs > 0.0
+    val accent = when {
+        score.score >= 75 -> BlueStrong
+        score.score >= 45 -> AvgLine
+        pinged -> WarnText
+        else -> Ink2
+    }
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(96.dp)
+            .background(Surface, RoundedCornerShape(16.dp))
+            .border(1.5.dp, accent.copy(alpha = (if (pinged) 0.9f else 0.55f)), RoundedCornerShape(16.dp))
+            .padding(horizontal = 22.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // --- left: latency headline ---
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.Center) {
+            Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                SectionLabel("Latency")
+                if (!pinged) {
+                    Spacer(Modifier.width(4.dp))
+                    Text("not measured", fontSize = 8.5.sp, color = WarnText, fontFamily = ChakraPetch)
+                }
+            }
+            Spacer(Modifier.height(2.dp))
+            Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(
+                    if (pinged) fmt(pingMs, 1) else "—",
+                    style = NumberStyle(38f, if (pinged) Ink else Ink2)
+                )
+                Text("ms · median", fontSize = 11.sp, color = Ink2, fontFamily = ChakraPetch)
+            }
+            Spacer(Modifier.height(1.dp))
+            Text(
+                if (pinged)
+                    "min ${fmt(if (minPingMs > 0.0) minPingMs else pingMs, 1)}  ·  max ${fmt(if (maxPingMs > 0.0) maxPingMs else pingMs, 1)}  ·  jitter ${fmt(jitterMs, 1)} ms  ·  loss ${fmt(lossPct, 0)}%"
+                else "the box could not reach the server for latency — download/upload above still ran",
+                fontSize = 10.sp, color = if (pinged) Ink2 else WarnText, fontFamily = ChakraPetch
+            )
+        }
+        // --- divider ---
+        Box(Modifier.width(0.5.dp).height(56.dp).background(Line))
+        Spacer(Modifier.width(20.dp))
+        // --- right: quality score ---
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            SectionLabel("Quality")
+            Spacer(Modifier.height(2.dp))
+            Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(score.score.toString(), style = NumberStyle(38f, accent))
+                Text("/ 100", fontSize = 11.sp, color = Ink2, fontFamily = ChakraPetch)
+            }
+            Spacer(Modifier.height(1.dp))
+            Text(score.grade, fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = accent, fontFamily = ChakraPetch)
+        }
+    }
 }
 
 @Composable
