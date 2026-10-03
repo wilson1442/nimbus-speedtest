@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Nimbus — Home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&amp;family=Oxanium:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#3D7DBF}a:hover{color:#2E6AA8}
+.nm-grid{background-image:linear-gradient(#DCE6EF 1px,transparent 1px),linear-gradient(90deg,#DCE6EF 1px,transparent 1px);background-size:80px 80px}
+.nm-ring{position:absolute;left:50%;top:50%;border-radius:50%;border:2px solid #9CC2E6;animation:nmRing 3.6s ease-out infinite}
+.nm-ring.d2{animation-delay:1.2s}.nm-ring.d3{animation-delay:2.4s}
+@keyframes nmRing{0%{transform:translate(-50%,-50%) scale(.9);opacity:.8}100%{transform:translate(-50%,-50%) scale(1.6);opacity:0}}
+.nm-ecg{stroke-dasharray:2600;animation:nmEcg 7s linear infinite}
+@keyframes nmEcg{from{stroke-dashoffset:2600}to{stroke-dashoffset:-2600}}
+.nm-orbit{animation:nmSpin 24s linear infinite;transform-origin:50% 50%}
+@keyframes nmSpin{to{transform:rotate(360deg)}}
+.nm-nav{text-decoration:none}
+</style>
+</helmet>
+<div style="width: 1920px; height: 1080px; position: relative; overflow: hidden; background: #F4F6F3; font-family: 'Chakra Petch', system-ui, sans-serif; color: #22384E; box-sizing: border-box">
+<svg width="1920" height="1080" viewBox="0 0 1920 1080" style="position: absolute; inset: 0" fill="none" stroke="#C9DCEE" stroke-width="2" aria-hidden="true"><path d="M0,860 C320,780 640,940 960,860 S1600,780 1920,860"></path><path d="M0,900 C320,820 640,980 960,900 S1600,820 1920,900" opacity="0.7"></path><path d="M0,940 C320,860 640,1020 960,940 S1600,860 1920,940" opacity="0.45"></path><path d="M0,190 C400,130 800,250 1200,180 S1700,120 1920,160" opacity="0.5"></path></svg>
+<svg width="1920" height="300" viewBox="0 0 1920 300" style="position: absolute; left: 0; top: 400px; opacity: 0.35" aria-hidden="true">
+<path class="nm-ecg" d="M0,150 l60,0 l14,-14 l14,14 l20,0 l10,30 l16,-150 l16,190 l12,-70 l20,0 l18,-16 l18,16 l102,0 l60,0 l14,-14 l14,14 l20,0 l10,30 l16,-150 l16,190 l12,-70 l20,0 l18,-16 l18,16 l102,0 l60,0 l14,-14 l14,14 l20,0 l10,30 l16,-150 l16,190 l12,-70 l20,0 l18,-16 l18,16 l102,0 l60,0 l14,-14 l14,14 l20,0 l10,30 l16,-150 l16,190 l12,-70 l20,0 l18,-16 l18,16 l102,0 l60,0 l14,-14 l14,14 l20,0 l10,30 l16,-150 l16,190 l12,-70 l20,0 l18,-16 l18,16 l102,0 l60,0 l14,-14 l14,14 l20,0 l10,30 l16,-150 l16,190 l12,-70 l20,0 l18,-16 l18,16 l102,0" fill="none" stroke="#7FB0DE" stroke-width="3" stroke-linejoin="round"></path>
+</svg>
+
+<div style="position: relative; height: 100%; box-sizing: border-box; padding: 54px 96px; display: flex; flex-direction: column">
+<header style="display: flex; align-items: center; justify-content: space-between; gap: 32px">
+<div style="display: flex; align-items: center; gap: 18px">
+<svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true"><rect width="56" height="56" rx="16" fill="#5B9BD5"></rect><path d="M14 34a14 14 0 0 1 28 0" fill="none" stroke="#FBFCFA" stroke-width="3.5" stroke-linecap="round"></path><path d="M20 34a8 8 0 0 1 16 0" fill="none" stroke="#FBFCFA" stroke-width="3.5" stroke-linecap="round"></path><circle cx="28" cy="34" r="3" fill="#FBFCFA"></circle></svg>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<span style="font-size: 32px; font-weight: 700; letter-spacing: 0.02em">Nimbus</span>
+<span style="font-size: 15px; font-weight: 500; letter-spacing: 0.24em; color: #586C80">SPEED TEST</span>
+</div>
+</div>
+<nav aria-label="Main" style="display: flex; gap: 12px; padding: 8px; border-radius: 999px; background: #FBFCFA; border: 1px solid #D9E3EC">
+<a class="nm-nav" href="Main.dc.html" style="padding: 14px 32px; border-radius: 999px; background: #E1EDF8; color: #22384E; font-size: 22px; font-weight: 600">Test</a>
+<a class="nm-nav" href="History.dc.html" style="padding: 14px 32px; border-radius: 999px; color: #586C80; font-size: 22px; font-weight: 500">History</a>
+<a class="nm-nav" href="#settings" style="padding: 14px 32px; border-radius: 999px; color: #586C80; font-size: 22px; font-weight: 500">Settings</a>
+</nav>
+<div aria-label="Connection status" style="display: flex; align-items: stretch; border-radius: 999px; background: #FBFCFA; border: 1px solid #D9E3EC; font-size: 20px; color: #586C80; overflow: hidden">
+<sc-if value="{{vpnOn}}" hint-placeholder-val="{{ true }}">
+<span style="display: flex; align-items: center; gap: 10px; padding: 14px 22px; background: #E1EDF8; color: #22384E; font-weight: 600"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3D7DBF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"></path><path d="M8.5 12l2.5 2.5 4.5-5"></path></svg>VPN connected</span>
+</sc-if>
+<sc-if value="{{vpnOff}}" hint-placeholder-val="{{ false }}">
+<span style="display: flex; align-items: center; gap: 10px; padding: 14px 22px; background: #FBEFE5; color: #9A4F1C; font-weight: 600"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9A4F1C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"></path><path d="M4 4l16 16"></path></svg>No VPN</span>
+</sc-if>
+<span style="display: flex; align-items: center; gap: 10px; padding: 14px 22px; border-left: 1px solid #D9E3EC">WAN IP <span style="font-family: 'Oxanium', sans-serif; font-weight: 700; color: #22384E">203.0.113.42</span></span>
+<span style="display: flex; align-items: center; gap: 10px; padding: 14px 22px; border-left: 1px solid #D9E3EC"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3D7DBF" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 9a15 15 0 0 1 20 0"></path><path d="M5.5 12.5a10 10 0 0 1 13 0"></path><path d="M9 16a5 5 0 0 1 6 0"></path><circle cx="12" cy="19.5" r="1" fill="#3D7DBF"></circle></svg><span style="color: #22384E; font-weight: 600">Wi‑Fi 5 GHz</span></span>
+</div>
+</header>
+
+<main style="flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px; position: relative">
+<div style="position: relative; width: 560px; height: 560px">
+<svg class="nm-orbit" width="560" height="560" viewBox="0 0 560 560" style="position: absolute; inset: 0" aria-hidden="true"><circle cx="280" cy="280" r="270" fill="none" stroke="#A9CBEA" stroke-width="2" stroke-dasharray="4 14"></circle><circle cx="280" cy="10" r="6" fill="#5B9BD5"></circle></svg>
+<div class="nm-ring" style="width: 360px; height: 360px"></div>
+<div class="nm-ring d2" style="width: 360px; height: 360px"></div>
+<div class="nm-ring d3" style="width: 360px; height: 360px"></div>
+<a href="Testing.dc.html" aria-label="Start speed test" style="position: absolute; left: 100px; top: 100px; width: 360px; height: 360px; border-radius: 50%; background: #3D7DBF; color: #FBFCFA; text-decoration: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 0 0 14px #F4F6F3, 0 0 0 22px #9CC2E6, 0 30px 60px rgba(61,125,191,0.28)">
+<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#FBFCFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"></path></svg>
+<span style="font-size: 54px; font-weight: 700; letter-spacing: 0.14em">START</span>
+<span style="font-size: 18px; font-weight: 500; letter-spacing: 0.2em; color: #DCEAF7">PRESS OK</span>
+</a>
+</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 12px">
+<p style="margin: 0; font-size: 22px; color: #586C80">Measures ping, download and upload in about 30 seconds · Server: Auto (nearest)</p>
+<sc-if value="{{vpnOn}}" hint-placeholder-val="{{ true }}">
+<p style="margin: 0; display: flex; align-items: center; gap: 10px; font-size: 19px; color: #45627F"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#45627F" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><circle cx="12" cy="8" r="0.6"></circle></svg>VPN detected — results will reflect your VPN route, not your raw ISP speed</p>
+</sc-if>
+</div>
+</main>
+
+<footer style="display: flex; align-items: stretch; justify-content: center; gap: 24px">
+<div style="display: flex; align-items: center; gap: 48px; padding: 26px 44px; border-radius: 28px; background: #FBFCFA; border: 1px solid #D9E3EC">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<span style="font-size: 16px; font-weight: 600; letter-spacing: 0.18em; color: #586C80">LAST TEST</span>
+<span style="font-size: 20px; color: #22384E">Today · 8:42 PM</span>
+</div>
+<div style="width: 1px; align-self: stretch; background: #D9E3EC"></div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 16px; font-weight: 600; letter-spacing: 0.18em; color: #586C80">DOWNLOAD</span>
+<span style="font-family: 'Oxanium', sans-serif; font-size: 36px; font-weight: 700">418.3 <span style="font-size: 18px; font-weight: 500; color: #586C80">Mbps</span></span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 16px; font-weight: 600; letter-spacing: 0.18em; color: #586C80">UPLOAD</span>
+<span style="font-family: 'Oxanium', sans-serif; font-size: 36px; font-weight: 700">38.2 <span style="font-size: 18px; font-weight: 500; color: #586C80">Mbps</span></span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 16px; font-weight: 600; letter-spacing: 0.18em; color: #586C80">PING</span>
+<span style="font-family: 'Oxanium', sans-serif; font-size: 36px; font-weight: 700">14 <span style="font-size: 18px; font-weight: 500; color: #586C80">ms</span></span>
+</div>
+</div>
+<a href="History.dc.html" style="display: flex; flex-direction: column; justify-content: center; gap: 6px; padding: 26px 40px; border-radius: 28px; background: #E1EDF8; border: 1px solid #BFD6EC; text-decoration: none; color: #22384E">
+<span style="font-size: 16px; font-weight: 600; letter-spacing: 0.18em; color: #45627F">30‑DAY AVERAGE</span>
+<span style="font-family: 'Oxanium', sans-serif; font-size: 36px; font-weight: 700">391.2 <span style="font-size: 18px; font-weight: 500; color: #45627F">Mbps</span></span>
+</a>
+</footer>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"vpnOn":{"editor":"boolean","default":true},"$preview":{"width":1920,"height":1080}}'>
+class Component extends DCLogic {
+renderVals() {
+const vpnOn = this.props.vpnOn ?? true;
+return { vpnOn: vpnOn, vpnOff: !vpnOn };
+}
+}
+</script>
+</body>
+</html>

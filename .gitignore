@@ -1,0 +1,32 @@
+# --- Local toolchain (JDK 17 / Gradle 8.10 / Android SDK 35, ~1 GB) ---
+.tools/
+.fonts/
+
+# --- Gradle ---
+**/build/
+.gradle/
+.kotlin/
+local.properties
+gradle-wrapper.log
+
+# --- Logs & scratch/probe outputs ---
+*.log
+*.txt
+api_*.json
+lan_*.json
+deps.txt
+lt.json
+pt.json
+t_bearer.json
+
+# --- Binaries (APKs, keystores, archives) ---
+*.apk
+*.keystore
+*.jks
+*.zip
+
+# --- IDE / OS ---
+.idea/
+*.iml
+.DS_Store
+Thumbs.db

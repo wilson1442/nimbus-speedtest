@@ -1,0 +1,48 @@
+package cloud.g3h.nimbus
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import cloud.g3h.nimbus.ui.Ground
+import cloud.g3h.nimbus.ui.HistoryScreen
+import cloud.g3h.nimbus.ui.HomeScreen
+import cloud.g3h.nimbus.ui.NimbusViewModel
+import cloud.g3h.nimbus.ui.ResultsScreen
+import cloud.g3h.nimbus.ui.Screen
+import cloud.g3h.nimbus.ui.SettingsScreen
+import cloud.g3h.nimbus.ui.TestScreen
+import cloud.g3h.nimbus.ui.NimbusTypography
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
+
+class MainActivity : ComponentActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        val app = application as NimbusApp
+        setContent {
+            MaterialTheme(typography = NimbusTypography) {
+                val vm = androidx.lifecycle.viewmodel.compose.viewModel {
+                    NimbusViewModel(app)
+                }
+                val screen by vm.screen.collectAsState()
+                androidx.compose.foundation.layout.Box(Modifier.fillMaxSize().background(Ground)) {
+                    when (screen) {
+                        Screen.HOME -> HomeScreen(vm = vm, modifier = Modifier.fillMaxSize())
+                        Screen.TESTING -> TestScreen(vm = vm, modifier = Modifier.fillMaxSize())
+                        Screen.RESULTS -> ResultsScreen(vm = vm, modifier = Modifier.fillMaxSize())
+                        Screen.HISTORY -> HistoryScreen(vm = vm, modifier = Modifier.fillMaxSize())
+                        Screen.SETTINGS -> SettingsScreen(vm = vm, modifier = Modifier.fillMaxSize())
+                    }
+                }
+            }
+        }
+    }
+}
