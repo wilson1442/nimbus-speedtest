@@ -37,7 +37,8 @@ jobs:
       - name: Verify APK badging
         working-directory: src
         run: |
-          aapt dump badging app/build/outputs/apk/debug/app-debug.apk \
+          AAPT="$ANDROID_HOME/build-tools/35.0.0/aapt"
+          "$AAPT" dump badging app/build/outputs/apk/debug/app-debug.apk \
             | grep -E "package:|sdkVersion|targetSdkVersion|launchable|leanback"
           echo "APK built and badging verified"
 
