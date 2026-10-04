@@ -5,7 +5,7 @@ Speed test for Android TV and phones — **Kotlin + Jetpack Compose**, LibreSpee
 | | |
 |---|---|
 | Package | `cloud.g3h.nimbus` |
-| Current release | v1.7.1 / versionCode 13 (see `handoff/RELEASE_RECORD.md`) |
+| Current release | v1.7.2 / versionCode 14 (see `handoff/RELEASE_RECORD.md`) |
 | minSdk / targetSdk | 24 / 35 |
 | Leanback / touchscreen | both optional (one APK for TV + phones) |
 | Engine | LibreSpeed protocol: `empty.php` ping/upload · `garbage.php` download |
@@ -26,7 +26,7 @@ src/                      Gradle project root (./gradlew here)
       net/                SettingsStore (DataStore), ConnectionMonitor, UpdateChecker, SpeedServers
       ui/                 Compose screens (Home/Test/Results/History/Settings) + UpdateBanner
     src/test/             PingMathTest (10), QualityScoreTest (6), ServerProbeTest (2),
-                          UpdateCheckerTest (8), SpeedServersTest (8), InstallResumeTest (4),
+                          UpdateCheckerTest (8), SpeedServersTest (8), FocusTreatmentTest (3), InstallResumeTest (4),
                           LiveEmissionTest (live server, self-skips offline)
 design/                   HTML mockups the UI was built from
 handoff/                  RELEASE_RECORD.md (per-version verification evidence)
@@ -98,10 +98,11 @@ Recipients open the link on the device, then allow "install unknown apps" for th
 - `ServerProbeTest` — 2 tests (probe reports a reason when unreachable; latency when reachable).
 - `UpdateCheckerTest` — 8 tests (release-JSON parsing + the 60 s launch-check floor that stops a restart loop).
 - `SpeedServersTest` — 8 tests (catalogue is https/no-trailing-slash, unique labels+urls, all regions present, default selectable, `forUrl`/`displayName` behaviour).
+- `FocusTreatmentTest` — 3 tests (the focus ring clears the 3:1 non-text contrast floor on both the app background and cards; the old BlueSoft ring's 1.71:1 is pinned as the counter-example).
 - `InstallResumeTest` — 4 tests (an update completes on returning from the "install unknown apps" toggle, stays pending if the grant is still missing, and a plain resume never installs).
 - `LiveEmissionTest` — runs the real engine against the default server and asserts the engine emits live progress *during* download and upload (regression guard for the realtime display). Self-skips via `assumeTrue` when the server is unreachable, so CI stays green offline.
 
-Full suite: **39/39**.
+Full suite: **42/42**.
 
 ## Speed-test servers
 
