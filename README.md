@@ -60,7 +60,7 @@ The pipeline is **git-tag driven**:
    ./release.sh v1.0.3 4
    ```
 
-   `release.sh` downloads the tag archive from GitHub, packages `src/`, submits the builder build (appTypeId 9, keystore 7), polls to completion, writes `handoff/nimbus-speedtest-1.0.3-v4-signed.apk`, **and publishes a GitHub Release** with the signed APK as an asset (the in-app update endpoint — see below). It does **not** call the builder publish route (ATV-Store-only, human-approved).
+   `release.sh` downloads the tag archive from GitHub, packages `src/`, submits the builder build (appTypeId 9, keystore 7), polls to completion, writes `handoff/nimbus-<version>-v<code>-signed.apk`, **and publishes a GitHub Release** with the signed APK as an asset (the in-app update endpoint — see below). It does **not** call the builder publish route (ATV-Store-only, human-approved).
 4. Run the §10.1 gate on the downloaded APK (badging, apksigner, sha256, placeholder scan) and append evidence to `handoff/RELEASE_RECORD.md`.
 
 The public builder domain is behind Cloudflare: API calls need a browser-like `User-Agent` or they 403 (WAF 1010) — `release.sh` handles this.
@@ -69,7 +69,7 @@ The public builder domain is behind Cloudflare: API calls need a browser-like `U
 
 Installed apps update themselves from **GitHub Releases** — this repo's release page *is* the distribution endpoint:
 
-- `release.sh` attaches the signed APK to the tag's GitHub Release (asset name `nimbus-speedtest-<version>-v<code>-signed.apk`) and writes a machine-readable `nimbus-versionCode=<code>` line into the release notes.
+- `release.sh` attaches the signed APK to the tag's GitHub Release (asset name `nimbus-<version>-v<code>-signed.apk`) and writes a machine-readable `nimbus-versionCode=<code>` line into the release notes.
 - **Automatic check, explicit consent.** On **every app open** the app checks the public GitHub API (`GET /repos/wilson1442/nimbus-speedtest/releases/latest`) and compares `versionCode` against its own. When a newer build exists it **prompts**: *"Update available — vX (Y MB). Download it now?"* → Download / Later, then *"Update ready to install"* → Install now / Later. Nothing is downloaded or installed without the user accepting; BACK dismisses the prompt for that session. (A 60 s floor between checks only stops a crash/restart loop from hammering the API — it is not a periodic throttle.)
 - Download progress shows as a banner pill on every screen; the **Settings → App update** row still offers a manual *Check* / *Download* / *Install*, and the **Auto-update** toggle (default On) can disable the launch check entirely.
 - **Android's "install unknown apps" grant is handled without a restart.** If the toggle is off, the prompt switches to *"One more step"* and opens the setting; on returning, `MainActivity.onResume()` → `NimbusViewModel.onAppResumed()` fires the install immediately. (It used to stall there until the app was force-closed.)
@@ -81,11 +81,11 @@ To push an update to devices: ship a new tag via the pipeline above. Devices on 
 
 ### Links to hand out
 
-Every release publishes the APK twice: the versioned asset (`nimbus-speedtest-<ver>-v<code>-signed.apk`, what the in-app updater looks for)
+Every release publishes the APK twice: the versioned asset (`nimbus-<ver>-v<code>-signed.apk`, what the in-app updater looks for, matched by its `-signed.apk` suffix)
 and a version-free alias, so this **permanent** link always serves the newest build:
 
 ```
-https://github.com/wilson1442/nimbus-speedtest/releases/latest/download/nimbus-speed-test.apk
+https://github.com/wilson1442/nimbus-speedtest/releases/latest/download/nimbus.apk
 ```
 
 The release page itself (version notes, all past builds) is https://github.com/wilson1442/nimbus-speedtest/releases/latest.

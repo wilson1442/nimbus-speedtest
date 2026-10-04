@@ -30,7 +30,7 @@
 | Fonts bundled | chakrapetch regular/medium/semibold/bold + oxanium medium/semibold/bold (confirmed in resources.arsc) |
 | App code | MainActivity, LibreSpeedEngine, HomeScreen present in classes2.dex |
 | Local gate | assembleDebug EXIT=0; unit tests pass (39/39: 10 PingMath + 2 ServerProbe + 1 LiveEmission + 8 UpdateChecker + 6 QualityScore + 8 SpeedServers + 4 InstallResume) |
-| Publication | **GitHub Release `v1.7.1`** (https://github.com/wilson1442/nimbus-speedtest/releases/tag/v1.7.1) — signed APK attached as asset `nimbus-speedtest-1.7.1-v13-signed.apk`; published by `release.sh` (no API 500), served bytes verified byte-identical to `handoff/`; the in-app logo extracted from the signed APK is **pixel-identical** to the source art (mean abs diff 0.0) with the orange needle present and all four corners exactly the app background (244,246,243), i.e. the old placeholder tile is gone. Builder's publish route unused, §23. |
+| Publication | **GitHub Release `v1.7.1`** (https://github.com/wilson1442/nimbus-speedtest/releases/tag/v1.7.1) — assets published under production names: `nimbus-1.7.1-v13-signed.apk` and the version-free alias `nimbus.apk`; the earlier `nimbus-speedtest-*` / `nimbus-speed-test.apk` names were removed so no file name carries "test". Both verified 200 / `application/vnd.android.package-archive` / 8,491,168 bytes, byte-identical to `handoff/`; the in-app logo extracted from the signed APK is **pixel-identical** to the source art; the feed still resolves exactly one `-signed.apk` asset. Builder's publish route unused, §23. |
 | Source repo | `https://github.com/wilson1442/nimbus-speedtest` (public, `main`) — local path `F:\hermes-work\coder\nimbus-speedtest`; release keystore is NOT in the repo (apk-builder holds it) |
 
 ## v1.7.1 change (2026-10-03) — real logo inside the app, bigger on the dashboard
@@ -42,6 +42,22 @@ The in-app logo was a **hand-drawn placeholder** (`NimbusLogoTile`: a blue round
 - Verified by rendering the top bar at 1920×1080 with the real art (`handoff/inapp-topbar.png`): logo inside the 48 dp bar, 12 dp clear of the Location row, no seam; and by extracting the logo back out of the shipped APK (`handoff/shipped-inapp-logo.png`).
 
 **Tests:** 39/39 unchanged (the change is presentational).
+
+## Production file names (2026-10-03, after v1.7.1)
+
+The app became release-ready, so **"test" was taken out of every published file name**:
+
+| | before | after |
+|---|---|---|
+| versioned asset | `nimbus-speedtest-<ver>-v<code>-signed.apk` | `nimbus-<ver>-v<code>-signed.apk` |
+| stable alias | `nimbus-speed-test.apk` | `nimbus.apk` |
+| local build output | `handoff/nimbus-speedtest-<ver>-v<code>-signed.apk` | `handoff/nimbus-<ver>-v<code>-signed.apk` |
+
+- Applied to the live v1.7.1 release by **uploading the new names first, verifying them, then deleting the old ones** — so the in-app updater never saw a release with no `-signed.apk` asset.
+- The version-free alias keeps the `-signed.apk` suffix OFF deliberately: `UpdateChecker` takes the first asset with that suffix, so a second match could be picked instead of the build.
+- `release.sh` (`OUT`, `APK_NAME`, `STABLE_NAME`, the notes body) and the README were updated to the new names, so future releases do this automatically. **No APK rebuild was needed** — the bytes are unchanged, only the asset names.
+- The permanent handout link is now: `https://github.com/wilson1442/nimbus-speedtest/releases/latest/download/nimbus.apk`
+- Unchanged on purpose: the repo name (`nimbus-speedtest`), the backend host `nyc.speedtest.clouvider.net`, and the app's on-screen label **"Nimbus Speed Test"** (the app genuinely is a speed test, and "SPEED TEST" is part of the logo lockup).
 
 ## v1.7.0 change (2026-10-03) — Nimbus logo as the app icon; updates install without a force-close
 
@@ -226,7 +242,7 @@ No user-visible feature change. Findings from a whole-codebase review, each veri
 
 ## Artifacts
 
-- **`nimbus-speedtest-1.7.1-v13-signed.apk`** — current production-signed release (keystore id=7; real brand logo in-app at 42 dp, logo launcher icon + TV banner, update installs on return from the permission toggle, Home location dropdown, update prompt on every launch, country flags). Also attached to GitHub Release `v1.7.1` (verified byte-identical).
+- **`nimbus-1.7.1-v13-signed.apk`** (local copy: `handoff/nimbus-speedtest-1.7.1-v13-signed.apk`) — current production-signed release (keystore id=7; real brand logo in-app at 42 dp, logo launcher icon + TV banner, update installs on return from the permission toggle, Home location dropdown, update prompt on every launch, country flags). Also attached to GitHub Release `v1.7.1` (verified byte-identical).
 - `nimbus-speedtest-1.7.0-v12-signed.apk` — previous release (logo launcher icon), superseded.
 - `nimbus-speedtest-1.0.2-v3-signed.apk` — previous release (realtime bandwidth), superseded.
 - `nimbus-speedtest-1.0.1-v2-signed.apk` — superseded.

@@ -122,7 +122,7 @@ echo "build completed"
 # The /download route is a 302 -> signed R2/Cloudflare URL, so follow
 # redirects (-L). Validate it's a real APK (a zip) and non-trivial size;
 # never trust the write blindly.
-OUT="handoff/nimbus-speedtest-${VERSION_NAME}-v${CODE}-signed.apk"
+OUT="handoff/nimbus-${VERSION_NAME}-v${CODE}-signed.apk"
 mkdir -p handoff
 curl -sL -m 300 "$BASE/api/v1/builds/$BID/download" \
   -H "User-Agent: $UA" -H "X-API-Key: $APK_BUILDER_SKILL_KEY" -o "$OUT"
@@ -150,7 +150,7 @@ else
   BODY="$(cat <<EOF
 $TAGMSG
 
-- APK: nimbus-speedtest-${VERSION_NAME}-signed.apk ($SZ bytes)
+- APK: nimbus-${VERSION_NAME}-v${CODE}-signed.apk ($SZ bytes)
 - SHA-256: $SHA
 - Source: https://github.com/$OWNER_REPO/tree/$TAG
 
@@ -158,7 +158,7 @@ nimbus-versionCode=$CODE
 EOF
 )"
   echo "publishing GitHub Release $TAG ..."
-  APK_NAME="nimbus-speedtest-${VERSION_NAME}-v${CODE}-signed.apk"
+  APK_NAME="nimbus-${VERSION_NAME}-v${CODE}-signed.apk"
   if command -v gh >/dev/null 2>&1; then
     # gh CLI path (auth already configured). The API occasionally returns a
     # transient 500 on create — retry a few times, then VERIFY the release
@@ -212,10 +212,10 @@ except Exception: print("")' 2>/dev/null || true)"
   fi
   # Also attach a version-free alias, which gives a PERMANENT download link that
   # keeps working when a new version ships:
-  #   https://github.com/$OWNER_REPO/releases/latest/download/nimbus-speed-test.apk
+  #   https://github.com/$OWNER_REPO/releases/latest/download/nimbus.apk
   # It deliberately does NOT end in "-signed.apk": UpdateChecker picks the FIRST
   # asset with that suffix, so a second match could be selected instead of the build.
-  STABLE_NAME="nimbus-speed-test.apk"
+  STABLE_NAME="nimbus.apk"
   STABLE_PATH=".release-work/$STABLE_NAME"
   if command -v gh >/dev/null 2>&1; then
     mkdir -p .release-work
