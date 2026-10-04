@@ -49,7 +49,12 @@ fi
 # --- 1. resolve tag -> commit + versionName ------------------
 OWNER_REPO="$(git remote get-url origin | sed -E 's#(https?://|git@)github\.com[:/]##; s#\.git$##')"
 TAGREF="refs/tags/$TAG"
-COMMIT="$(git ls-remote origin "$TAGREF" | awk '{print $1}')"
+# An annotated tag is its own object: `ls-remote <ref>` returns the TAG OBJECT
+# sha, and the peeled COMMIT sha only for the `<ref>^{}` refspec. A lightweight
+# tag has no peeled row. Prefer the commit so the log line and `gh --target`
+# reference a commit, not the tag object.
+COMMIT="$(git ls-remote origin "$TAGREF^{}" | awk 'NR==1{print $1}')"
+[ -n "$COMMIT" ] || COMMIT="$(git ls-remote origin "$TAGREF" | awk 'NR==1{print $1}')"
 [ -n "$COMMIT" ] || { echo "FATAL: tag $TAG not found on origin" >&2; exit 1; }
 VERSION_NAME="${TAG#v}"
 case "$CODE" in (*[!0-9]*|'') echo "FATAL: versionCode must be an integer" >&2; exit 1;; esac
