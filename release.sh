@@ -210,6 +210,23 @@ except Exception: print("")' 2>/dev/null || true)"
       -H "Content-Type: application/octet-stream" \
       --data-binary @"$OUT" >/dev/null
   fi
+  # Also attach a version-free alias, which gives a PERMANENT download link that
+  # keeps working when a new version ships:
+  #   https://github.com/$OWNER_REPO/releases/latest/download/nimbus-speed-test.apk
+  # It deliberately does NOT end in "-signed.apk": UpdateChecker picks the FIRST
+  # asset with that suffix, so a second match could be selected instead of the build.
+  STABLE_NAME="nimbus-speed-test.apk"
+  STABLE_PATH=".release-work/$STABLE_NAME"
+  if command -v gh >/dev/null 2>&1; then
+    mkdir -p .release-work
+    cp "$OUT" "$STABLE_PATH"
+    if gh release upload "$TAG" "$STABLE_PATH" --clobber >/dev/null 2>&1; then
+      echo "stable download link: https://github.com/$OWNER_REPO/releases/latest/download/$STABLE_NAME"
+    else
+      echo "warn: stable alias not attached (the versioned asset is still published)"
+    fi
+  fi
+
   # hard check: the app's feed is /releases/latest — confirm it resolves
   LIVE="$(curl -sL -m 30 -H "User-Agent: $UA" \
     "https://api.github.com/repos/$OWNER_REPO/releases/tags/$TAG" \

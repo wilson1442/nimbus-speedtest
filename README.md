@@ -79,6 +79,18 @@ Installed apps update themselves from **GitHub Releases** — this repo's releas
 
 To push an update to devices: ship a new tag via the pipeline above. Devices on v1.3.0+ check on every launch, so they'll be prompted shortly after next open.
 
+### Links to hand out
+
+Every release publishes the APK twice: the versioned asset (`nimbus-speedtest-<ver>-v<code>-signed.apk`, what the in-app updater looks for)
+and a version-free alias, so this **permanent** link always serves the newest build:
+
+```
+https://github.com/wilson1442/nimbus-speedtest/releases/latest/download/nimbus-speed-test.apk
+```
+
+The release page itself (version notes, all past builds) is https://github.com/wilson1442/nimbus-speedtest/releases/latest.
+Recipients open the link on the device, then allow "install unknown apps" for their browser once.
+
 ## Tests
 
 - `PingMathTest` — 10 unit tests (median ping, jitter, loss math).
