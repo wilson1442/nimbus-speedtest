@@ -1,9 +1,14 @@
 package cloud.g3h.nimbus.net
 
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /** Live connection state shown in the top status bar (§5). */
 data class ConnectionState(
@@ -38,6 +43,11 @@ class ConnectionMonitor(context: Context) {
     private val _state = MutableStateFlow(ConnectionState())
     val state: StateFlow<ConnectionState> = _state
 
+    // One shared IO scope for the WAN-IP lookup; overlapping fetches cancel the
+    // previous one instead of stacking a new thread per call.
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private var wanJob: Job? = null
+
     private val callback = object : android.net.ConnectivityManager.NetworkCallback() {
         override fun onAvailable(network: android.net.Network) {
             _state.update { it.copy(online = true, wanIpLoading = true) }
@@ -70,6 +80,7 @@ class ConnectionMonitor(context: Context) {
     }
 
     fun stop() {
+        wanJob?.cancel()
         runCatching { cm.unregisterNetworkCallback(callback) }
     }
 
@@ -98,22 +109,25 @@ class ConnectionMonitor(context: Context) {
 
     /** Plain-text GET; refreshes the WAN IP (VPN exit IP when a VPN is active). */
     fun fetchWanIp(ctx: Context) {
-        Thread {
-            val endpoint = kotlinx.coroutines.runBlocking { SettingsStore.ipLookupUrl(ctx) }
-            if (endpoint.isBlank()) { _state.update { it.copy(wanIpLoading = false) }; return@Thread }
-            runCatching {
-                val conn = java.net.URL(endpoint).openConnection() as java.net.HttpURLConnection
-                conn.connectTimeout = 8000
-                conn.readTimeout = 8000
-                val ip = if (conn.responseCode == 200)
-                    conn.inputStream.bufferedReader().readText().trim().takeIf { it.isNotEmpty() }
-                else null
-                conn.disconnect()
-                if (ip != null) _state.update { it.copy(wanIp = ip, wanIpLoading = false) }
-                else _state.update { it.copy(wanIpLoading = false) }
-            }.onFailure {
+        wanJob?.cancel()
+        wanJob = scope.launch {
+            try {
+                val endpoint = SettingsStore.ipLookupUrl(ctx)
+                if (endpoint.isNotBlank()) {
+                    val conn = java.net.URL(endpoint).openConnection() as java.net.HttpURLConnection
+                    conn.connectTimeout = 8000
+                    conn.readTimeout = 8000
+                    val ip = if (conn.responseCode == 200)
+                        conn.inputStream.bufferedReader().readText().trim().takeIf { it.isNotEmpty() }
+                    else null
+                    conn.disconnect()
+                    if (ip != null) _state.update { it.copy(wanIp = ip) }
+                }
+            } catch (_: Exception) {
+                // Keep the last known IP; just stop the spinner.
+            } finally {
                 _state.update { it.copy(wanIpLoading = false) }
             }
-        }.start()
+        }
     }
 }

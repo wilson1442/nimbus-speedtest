@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -16,9 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Text
@@ -74,24 +71,6 @@ fun WifiIcon(tint: Color, modifier: Modifier = Modifier.size(14.dp)) {
 }
 
 @Composable
-fun EthernetIcon(tint: Color, modifier: Modifier = Modifier.size(14.dp)) {
-    Canvas(modifier = modifier) {
-        val w = size.width; val h = size.height
-        val stroke = w * 0.1f
-        drawRoundRect(
-            color = tint, topLeft = Offset(w * 0.14f, h * 0.32f),
-            size = Size(w * 0.72f, h * 0.42f),
-            cornerRadius = CornerRadius(w * 0.08f, w * 0.08f),
-            style = Stroke(stroke)
-        )
-        for (x in floatArrayOf(0.3f, 0.5f, 0.7f)) {
-            drawLine(tint, Offset(w * x, h * 0.32f), Offset(w * x, h * 0.14f), strokeWidth = stroke * 0.7f)
-        }
-        drawLine(tint, Offset(w * 0.5f, h * 0.74f), Offset(w * 0.5f, h * 0.9f), strokeWidth = stroke * 0.7f)
-    }
-}
-
-@Composable
 fun PulseIcon(tint: Color, modifier: Modifier = Modifier.size(16.dp)) {
     Canvas(modifier = modifier) {
         val w = size.width; val h = size.height
@@ -138,77 +117,7 @@ fun TrashIcon(tint: Color, modifier: Modifier = Modifier.size(14.dp)) {
     }
 }
 
-@Composable
-fun PlayIcon(tint: Color, modifier: Modifier = Modifier.size(16.dp)) {
-    Canvas(modifier = modifier) {
-        drawPath(
-            Path().apply {
-                moveTo(size.width * 0.32f, size.height * 0.22f)
-                lineTo(size.width * 0.8f, size.height * 0.5f)
-                lineTo(size.width * 0.32f, size.height * 0.78f)
-                close()
-            }, tint
-        )
-    }
-}
-
-@Composable
-fun ClockIcon(tint: Color, modifier: Modifier = Modifier.size(14.dp)) {
-    Canvas(modifier = modifier) {
-        val w = size.width; val h = size.height
-        drawCircle(color = tint, radius = w * 0.42f, style = Stroke(w * 0.09f))
-        drawPath(
-            Path().apply {
-                moveTo(w * 0.5f, h * 0.28f); lineTo(w * 0.5f, h * 0.5f); lineTo(w * 0.68f, h * 0.6f)
-            }, tint, style = Stroke(w * 0.08f)
-        )
-    }
-}
-
 // ---------- Cards ----------
-
-/** A bordered surface card with a label on top and big content below. */
-@Composable
-fun StatCard(
-    label: String,
-    content: @Composable () -> Unit,
-    modifier: Modifier = Modifier,
-    corner: Dp = 16.dp,
-    fill: Color = Surface,
-    borderColor: Color = Line
-) {
-    SurfaceBox(
-        modifier = modifier,
-        corner = corner,
-        fill = fill,
-        borderColor = borderColor,
-        padding = PaddingValues(horizontal = 18.dp, vertical = 12.dp)
-    ) {
-        Text(label.uppercase(), style = LabelStyle(7.5f))
-        Spacer(Modifier.height(4.dp))
-        content()
-    }
-}
-
-@Composable
-fun SurfaceBox(
-    modifier: Modifier = Modifier,
-    corner: Dp = 16.dp,
-    fill: Color = Surface,
-    borderColor: Color = Line,
-    padding: PaddingValues = PaddingValues(12.dp),
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Box(
-        modifier = modifier
-            .background(fill, RoundedCornerShape(corner))
-            .border(1.dp, borderColor, RoundedCornerShape(corner))
-            .padding(padding),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(modifier = Modifier.fillMaxWidth(), content = content)
-    }
-}
 
 /** "vs avg" delta pill: up = tint/blue, down = warnBg/warnText. */
 @Composable
@@ -263,24 +172,6 @@ fun Sparkline(
     }
 }
 
-/** Dashed divider line. */
-@Composable
-fun DashedLine(color: Color = Line, modifier: Modifier = Modifier, dashLength: Dp = 6.dp) {
-    Box(
-        modifier = modifier
-            .height(1.dp)
-            .drawBehind {
-                val dashPx = dashLength.value * density
-                val step = dashPx * 2f
-                var x = 0f
-                while (x < size.width) {
-                    drawLine(color, Offset(x, 0.5f), Offset(minOf(x + dashPx, size.width), 0.5f), strokeWidth = 1f)
-                    x += step
-                }
-            }
-    )
-}
-
 /** Small uppercase section label with letter-spacing. */
 @Composable
 fun SectionLabel(text: String, modifier: Modifier = Modifier, color: Color = Ink2) {
@@ -289,25 +180,6 @@ fun SectionLabel(text: String, modifier: Modifier = Modifier, color: Color = Ink
         modifier = modifier,
         style = LabelStyle(7.5f).copy(color = color)
     )
-}
-
-/** Big Oxanium number + small unit, side by side (baseline aligned). */
-@Composable
-fun BigNumber(value: String, unit: String, modifier: Modifier = Modifier, sizeSp: Float = 27f, color: Color = Ink) {
-    Row(modifier = modifier, verticalAlignment = Alignment.Bottom) {
-        Text(value, style = NumberStyle(sizeSp, color))
-        Spacer(Modifier.width(4.dp))
-        Text(unit, style = NumberStyle(sizeSp * 0.5f, Ink2, FontWeight.Medium))
-    }
-}
-
-/** Connection icon by type. */
-@Composable
-fun ConnectionIcon(type: String, modifier: Modifier = Modifier) {
-    when (type) {
-        "ETHERNET" -> EthernetIcon(BlueStrong, modifier)
-        else -> WifiIcon(BlueStrong, modifier)
-    }
 }
 
 /** VPN on/off pill for the History list. */

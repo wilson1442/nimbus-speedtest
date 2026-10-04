@@ -8,9 +8,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -60,10 +62,11 @@ class LibreSpeedEngine(
                 val raw = ArrayList<Double?>()
                 repeat(10) {
                     ensureActive()
-                    raw.add(timeGet("$base/empty.php"))
+                    val attempt = timeGet("$base/empty.php")
+                    raw.add(attempt.ms)
                     val m = PingMath.compute(raw)
-                    raw.last()?.let { pingSamples.add(it) }
-                    if (raw.last() == null) pingFailReason = lastPingError
+                    attempt.ms?.let { pingSamples.add(it) }
+                    if (attempt.ms == null) pingFailReason = attempt.error
                     pingMs = m.pingMs; jitterMs = m.jitterMs; lossPct = m.lossPct
                     if (m.pingMs > 0.0) minPing = if (minPing == 0.0) m.pingMs else minOf(minPing, m.pingMs)
                     progress = progress.copy(
@@ -138,7 +141,7 @@ class LibreSpeedEngine(
             } finally {
                 close()
             }
-        }
+        }.flowOn(Dispatchers.IO)
 
     /**
      * Runs [streams] parallel workers against [url] for [durationMs]. Every
@@ -214,35 +217,38 @@ class LibreSpeedEngine(
         return last
     }
 
-    private var lastPingError: String? = null
+    /** One `empty.php` round-trip: latency in ms, or the reason it failed. */
+    private class PingAttempt(val ms: Double?, val error: String?)
 
     override suspend fun probeServer(serverBaseUrl: String): ServerProbe {
         val base = serverBaseUrl.trimEnd('/')
         var best = Double.MAX_VALUE
         var lastError: String? = null
         repeat(3) {
-            val t = timeGet("$base/empty.php")
-            if (t != null) best = minOf(best, t) else lastError = lastPingError
+            val a = timeGet("$base/empty.php")
+            if (a.ms != null) best = minOf(best, a.ms) else lastError = a.error
         }
         return if (best != Double.MAX_VALUE) ServerProbe(true, best, null)
         else ServerProbe(false, 0.0, lastError ?: "unknown")
     }
 
-    private suspend fun timeGet(url: String): Double? =
-        runCatching {
+    /**
+     * Times a GET on [Dispatchers.IO] — the caller (the flow producer, or the
+     * Settings probe) may otherwise be on the main thread, and OkHttp's
+     * `execute()` is blocking. Returning the failure reason instead of stashing
+     * it in a field keeps this safe when a probe and a test run concurrently.
+     */
+    private suspend fun timeGet(url: String): PingAttempt = withContext(Dispatchers.IO) {
+        try {
             val t0 = System.nanoTime()
-            val req = Request.Builder().url(url).build()
-            httpClient.newCall(req).execute().use {
+            httpClient.newCall(Request.Builder().url(url).build()).execute().use {
                 if (!it.isSuccessful) error("HTTP ${it.code}")
             }
-            (System.nanoTime() - t0) / 1e6
-        }.fold(
-            onSuccess = { lastPingError = null; it },
-            onFailure = { e ->
-                // Capture a human-usable reason so the UI can explain a zero ping
-                // instead of silently rendering "0 ms".
-                lastPingError = e.message ?: e::class.java.simpleName
-                null
-            }
-        )
+            PingAttempt((System.nanoTime() - t0) / 1e6, null)
+        } catch (e: Exception) {
+            // Human-usable reason so the UI can explain a zero ping instead of
+            // silently rendering "0 ms".
+            PingAttempt(null, e.message ?: e::class.java.simpleName)
+        }
+    }
 }

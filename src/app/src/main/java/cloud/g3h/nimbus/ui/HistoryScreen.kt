@@ -271,14 +271,15 @@ fun LineChart(points: List<Double>, avg: Double, modifier: Modifier = Modifier, 
         t.animateTo(1f, androidx.compose.animation.core.tween(drawProgressMs))
     }
     val progress = t.value
+    // Scale is computed once per dataset, not on every animation frame.
+    val maxV = remember(points, avg) { max(points.maxOrNull() ?: 0.0, avg) * 1.12 }
     Canvas(modifier = modifier) {
-        val maxV = max(points.max(), avg) * 1.12
         val minV = 0.0
         val n = points.size
         val xStep = size.width / (n - 1)
         fun y(v: Double) = size.height * (1f - ((v - minV) / (maxV - minV)).toFloat())
 
-        // gridlines + y labels
+        // gridlines
         for (i in 0..3) {
             val gy = size.height * i / 3f
             drawLine(
@@ -286,13 +287,6 @@ fun LineChart(points: List<Double>, avg: Double, modifier: Modifier = Modifier, 
                 Offset(0f, gy), Offset(size.width, gy),
                 strokeWidth = 1f
             )
-            val v = (maxV - (maxV - minV) * i / 3.0)
-            val label = v.toString().let {
-                val d = it.toDoubleOrNull()?.toInt() ?: 0
-                d.toString()
-            }
-            // draw text label on the right
-            // (kept minimal: skip y labels for width; grid lines convey scale)
         }
 
         // visible prefix (left→right draw-in)
@@ -435,8 +429,6 @@ private fun HistoryRow(r: TestResult, highlight: Boolean) {
         )
     }
 }
-
-private fun Modifier.drawRowDivider(shouldDraw: (Int) -> Boolean): Modifier = this
 
 private fun TestResult.connectionLabel(type: String): String = when (type) {
     "ETHERNET" -> "Ethernet"

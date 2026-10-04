@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.unit.Density
 import androidx.compose.material3.Text
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -99,7 +98,7 @@ fun HomeScreen(
         }
 
         // ---- center stage: orbit + rings + ECG + START ----
-        val startFocus = FocusRequester()
+        val startFocus = remember { FocusRequester() }
         LaunchedEffect(Unit) { startFocus.requestFocus() }
 
         Box(

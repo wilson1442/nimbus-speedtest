@@ -16,9 +16,6 @@ interface TestResultDao {
     @Query("SELECT * FROM test_results WHERE timestamp >= :sinceMs ORDER BY timestamp DESC")
     suspend fun since(sinceMs: Long): List<TestResult>
 
-    @Query("SELECT * FROM test_results ORDER BY timestamp DESC LIMIT :limit")
-    suspend fun recent(limit: Int): List<TestResult>
-
     @Query(
         """
         SELECT
@@ -33,9 +30,6 @@ interface TestResultDao {
         """
     )
     suspend fun stats(sinceMs: Long, vpnFilter: Int? = null): RangeStats?
-
-    @Query("SELECT * FROM test_results WHERE timestamp >= :sinceMs AND vpn_active = 0 ORDER BY timestamp DESC")
-    suspend fun sinceNoVpn(sinceMs: Long): List<TestResult>
 
     @Query("DELETE FROM test_results")
     suspend fun deleteAll()

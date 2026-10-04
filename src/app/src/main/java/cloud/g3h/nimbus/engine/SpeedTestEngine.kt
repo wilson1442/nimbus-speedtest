@@ -1,7 +1,6 @@
 package cloud.g3h.nimbus.engine
 
 import cloud.g3h.nimbus.data.Phase
-import cloud.g3h.nimbus.data.Sample
 
 /** Progress emitted to the UI roughly every 200 ms during a run. */
 data class SpeedProgress(

@@ -31,7 +31,4 @@ data class RangeStats(
     val maxDownloadMbps: Double
 )
 
-/** One sample inside a run, used by sparklines and the background graphics. */
-data class Sample(val phase: Phase, val value: Double, val atMs: Long)
-
 enum class Phase { PING, DOWNLOAD, UPLOAD }

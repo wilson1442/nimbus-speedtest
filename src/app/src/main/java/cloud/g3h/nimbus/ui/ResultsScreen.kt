@@ -215,7 +215,7 @@ fun ResultsScreen(
         Spacer(Modifier.height(12.dp))
 
         // footer buttons
-        val againFocus = FocusRequester()
+        val againFocus = remember { FocusRequester() }
         LaunchedEffect(Unit) { againFocus.requestFocus() }
         Row(
             modifier = Modifier.fillMaxWidth(),

@@ -28,9 +28,11 @@ fun SettingsScreen(
     val probe by vm.probe.collectAsState()
     var editing by remember { mutableStateOf<Pair<String, String>?>(null) }
 
-    // BACK closes an open settings dialog before doing anything else.
-    vm.dialogBack = if (editing != null) { { editing = null } } else null
-    androidx.compose.runtime.DisposableEffect(Unit) {
+    // BACK closes an open settings dialog before doing anything else. Keyed on
+    // `editing` so the callback tracks the current dialog instead of being
+    // written during composition.
+    DisposableEffect(editing) {
+        vm.dialogBack = if (editing != null) { { editing = null } } else null
         onDispose { vm.dialogBack = null }
     }
 
@@ -146,6 +148,14 @@ fun SettingsScreen(
     }
 }
 
+/** D-pad character rows for the TV text-entry dialog (built once, not per frame). */
+private val keyboardRows = listOf(
+    "a b c d e f g",
+    "h i j k l m n",
+    "o p q r s t u",
+    "v w x y z 0-9"
+)
+
 /**
  * Text entry for a D-pad-only TV: focusable character grid + Backspace/Done.
  * Focus the letter to append it; Backspace to delete; Done to save.
@@ -158,14 +168,7 @@ private fun TextEntryDialog(
     onDismiss: () -> Unit
 ) {
     var text by remember { mutableStateOf(initial) }
-    val doneFocus = FocusRequester()
-
-    val rows = listOf(
-        "a b c d e f g",
-        "h i j k l m n",
-        "o p q r s t u",
-        "v w x y z 0-9"
-    )
+    val doneFocus = remember { FocusRequester() }
 
     Box(
         modifier = Modifier
@@ -200,7 +203,7 @@ private fun TextEntryDialog(
             }
             Spacer(Modifier.height(12.dp))
             // character grid (each letter focusable)
-            rows.forEach { row ->
+            keyboardRows.forEach { row ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(6.dp)

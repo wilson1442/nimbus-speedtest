@@ -34,6 +34,13 @@ import androidx.compose.runtime.getValue
 /** The four main screens. */
 enum class NimbusAppScreen { TEST, HISTORY, SETTINGS }
 
+/** Top-bar nav destinations (built once, not on every recomposition). */
+private val navPills = listOf(
+    NimbusAppScreen.TEST to "Test",
+    NimbusAppScreen.HISTORY to "History",
+    NimbusAppScreen.SETTINGS to "Settings"
+)
+
 /** Map a top-bar pill to the ViewModel screen. */
 fun NimbusAppScreen.toScreen(): Screen = when (this) {
     NimbusAppScreen.TEST -> Screen.HOME
@@ -125,11 +132,6 @@ private fun NavPills(
     active: NimbusAppScreen,
     onNavigate: (NimbusAppScreen) -> Unit
 ) {
-    val pills = listOf(
-        NimbusAppScreen.TEST to "Test",
-        NimbusAppScreen.HISTORY to "History",
-        NimbusAppScreen.SETTINGS to "Settings"
-    )
     Row(
         modifier = Modifier
             .background(Surface, RoundedCornerShape(999.dp))
@@ -137,7 +139,7 @@ private fun NavPills(
             .padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        pills.forEach { (screen, label) ->
+        navPills.forEach { (screen, label) ->
             val isActive = screen == active
             PillButton(
                 label = label,
