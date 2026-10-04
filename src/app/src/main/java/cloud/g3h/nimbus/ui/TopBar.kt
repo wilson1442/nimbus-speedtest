@@ -1,6 +1,7 @@
 package cloud.g3h.nimbus.ui
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,13 +11,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Text
+import cloud.g3h.nimbus.R
 import cloud.g3h.nimbus.net.ConnectionState
 import cloud.g3h.nimbus.ui.NimbusAppScreen
 import kotlinx.coroutines.flow.collectLatest
@@ -48,39 +49,26 @@ fun NimbusAppScreen.toScreen(): Screen = when (this) {
     NimbusAppScreen.SETTINGS -> Screen.SETTINGS
 }
 
-/** 28×28 logo tile (56 px ÷ 2): blue rounded square with two arcs + a dot. */
+/** The art is 640×354, so its width follows from the height. */
+private const val LOGO_ASPECT = 1.808f
+
+/**
+ * The Nimbus brand mark (cloud + speedometer).
+ *
+ * Uses the supplied logo art rather than the old hand-drawn placeholder tile.
+ * The artwork is drawn on a light plate that has been recoloured to the app's own
+ * background (#F4F6F3), so it sits on the dashboard with no visible edge. A
+ * transparent cut-out is not possible for this logo — its cloud fades into the
+ * same near-white as its background across a ~32 px band, so no colour-key,
+ * flood-fill or morphological seal can separate them.
+ */
 @Composable
-fun NimbusLogoTile(tile: Dp = 28.dp, modifier: Modifier = Modifier) {
-    val w = tile
-    Box(
-        modifier = modifier
-            .size(tile)
-            .background(Blue, RoundedCornerShape(8.dp))
-            .drawBehind {
-                val px = w.toPx()
-                val cx = px / 2f
-                val cy = px * 0.61f
-                val stroke = px * 0.065f
-                drawArc(
-                    color = Surface,
-                    startAngle = 180f,
-                    sweepAngle = -180f,
-                    useCenter = false,
-                    style = Stroke(stroke),
-                    topLeft = Offset(cx - px * 0.25f, cy - px * 0.25f),
-                    size = Size(px * 0.5f, px * 0.5f)
-                )
-                drawArc(
-                    color = Surface,
-                    startAngle = 180f,
-                    sweepAngle = -180f,
-                    useCenter = false,
-                    style = Stroke(stroke),
-                    topLeft = Offset(cx - px * 0.145f, cy - px * 0.145f),
-                    size = Size(px * 0.29f, px * 0.29f)
-                )
-                drawCircle(color = Surface, radius = px * 0.055f, center = Offset(cx, cy))
-            }
+fun NimbusLogoTile(height: Dp = 42.dp, modifier: Modifier = Modifier) {
+    Image(
+        painter = painterResource(R.drawable.nimbus_logo),
+        contentDescription = null,               // decorative: the wordmark follows it
+        contentScale = ContentScale.Fit,
+        modifier = modifier.size(width = height * LOGO_ASPECT, height = height)
     )
 }
 
