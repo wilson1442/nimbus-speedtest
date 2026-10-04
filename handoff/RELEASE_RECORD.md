@@ -4,17 +4,17 @@
 |---|---|
 | App name | Nimbus Speed Test |
 | Package ID | cloud.g3h.nimbus |
-| versionName | **1.1.1** (current) — 1.1.0, 1.0.2, 1.0.1, 1.0.0 (superseded) |
-| versionCode | **5** (current) — 4, 3, 2, 1 (builder `GET /api/v1/builds` history hangs server-side, noted gap per standard §22.3) |
+| versionName | **1.2.0** (current) — 1.1.1, 1.1.0, 1.0.2, 1.0.1, 1.0.0 (superseded) |
+| versionCode | **6** (current) — 5, 4, 3, 2, 1 (builder `GET /api/v1/builds` history hangs server-side, noted gap per standard §22.3) |
 | Build format | apk (zipaligned, apksigner v2+v3) |
 | Keystore | id=7, name "nimbus", alias `nimbus-key` (created 2026-10-03 14:03) |
-| Builder buildId | **e3627e29-055f-4903-84ec-cc7fcd9b8c37** (current) · 76c8d384-24a0-4dbd-b7a4-b5b96874f4f2 (v1.1.0) · 8bc85e33-328b-4fea-af65-af2b43aeee56 (v1.0.2) · 0e5c4e26-43bd-452b-b724-36b3107a490b (v1.0.1) · da74e82f-24f7-44ee-a05a-56ee49999d47 (v1.0.0) |
+| Builder buildId | **007f6686-bb0f-4be4-a80c-ad7e4a0ac5c9** (current) · e3627e29-055f-4903-84ec-cc7fcd9b8c37 (v1.1.1) · 76c8d384-24a0-4dbd-b7a4-b5b96874f4f2 (v1.1.0) · 8bc85e33-328b-4fea-af65-af2b43aeee56 (v1.0.2) · 0e5c4e26-43bd-452b-b724-36b3107a490b (v1.0.1) · da74e82f-24f7-44ee-a05a-56ee49999d47 (v1.0.0) |
 | App type | id=9 "Nimbus Speed Test" (created 2026-10-03 via skill-key `POST /api/v1/app-types`, defaultPackage cloud.g3h.nimbus, no template — archive-driven; note: `appName` form field is REQUIRED on `POST /api/v1/builds` or the API returns 400) |
-| Source | git repo `wilson1442/nimbus-speedtest` @ tag `v1.1.1` (commit `8b7d8a403cd5`) — previous releases: `v1.1.0` (`39f35bec36e1`), `v1.0.2` (`e602470`), v1.0.1/v1.0.0 (archive) |
+| Source | git repo `wilson1442/nimbus-speedtest` @ tag `v1.2.0` (commit `7caa3b7815a0`) — previous releases: `v1.1.1` (`8b7d8a403cd5`), `v1.1.0` (`39f35bec36e1`), `v1.0.2` (`e602470`), v1.0.1/v1.0.0 (archive) |
 | Build status | completed |
-| Built at | 2026-10-03 (builder local time, via `./release.sh v1.1.1 5`) |
-| APK SHA-256 | **2a3d376b39518fd49b130349f2cefba24496ca3d4ac1a711275fb1c5c5f9db5a** (current) · 25e88002f45da675f0b83820f25145cd13759572949c83b43aa20b6ffa4862b6 (v1.1.0) · e91c7b73fbf2e61360b47dc98e3743d285f805d1d070c8a3de909ac317996060 (v1.0.2) · bf7523399ee0edf18ffaf408b71f24a2904c5fb8d0359837f9a407085b60508a (v1.0.1) · b575d33c11d53e3415e79a4914dea2e4ee19bf6c872d4d3c8d95fb993c7089d7 (v1.0.0) |
-| APK size | 8,166,744 bytes |
+| Built at | 2026-10-03 (builder local time, via `./release.sh v1.2.0 6`) |
+| APK SHA-256 | **bda6b95ebb43fc0212fb6ad03d3248b33807b77527a6964d09e8fdc59f1ecc5b** (current) · 2a3d376b39518fd49b130349f2cefba24496ca3d4ac1a711275fb1c5c5f9db5a (v1.1.1) · 25e88002f45da675f0b83820f25145cd13759572949c83b43aa20b6ffa4862b6 (v1.1.0) · e91c7b73fbf2e61360b47dc98e3743d285f805d1d070c8a3de909ac317996060 (v1.0.2) · bf7523399ee0edf18ffaf408b71f24a2904c5fb8d0359837f9a407085b60508a (v1.0.1) · b575d33c11d53e3415e79a4914dea2e4ee19bf6c872d4d3c8d95fb993c7089d7 (v1.0.0) |
+| APK size | 8,183,128 bytes |
 | Cert DN | CN=Nimbus Speed Test, O=Nimbus Speed Test, L=Unknown, ST=Unknown, C=US |
 | Cert SHA-256 | 1940e036fd139e4562882628ba98d6ab1247998490ba251cf71da41257865f72 (identical across all builds — upgrade-compatible) |
 | Cert SHA-1 | 23a36fd99eec8d220af5da56fd55a3fb5eae0cc0 |
@@ -28,9 +28,30 @@
 | Placeholder scan | 0 unreplaced tokens in DEX |
 | Fonts bundled | chakrapetch regular/medium/semibold/bold + oxanium medium/semibold/bold (confirmed in resources.arsc) |
 | App code | MainActivity, LibreSpeedEngine, HomeScreen present in classes2.dex |
-| Local gate | assembleDebug EXIT=0; unit tests pass (10/10 PingMath + LiveEmissionTest) |
-| Publication | **GitHub Release `v1.1.1`** (https://github.com/wilson1442/nimbus-speedtest/releases/tag/v1.1.1) — signed APK attached as asset `nimbus-speedtest-1.1.1-v5-signed.apk`; served bytes verified byte-identical to `handoff/`. (The in-script publish hit a persistent GitHub-API 500 across all 3 retries and correctly FAILED LOUD; the release was created manually and verified. The builder's publish route remains unused, §23.) |
+| Local gate | assembleDebug EXIT=0; unit tests pass (23/23: 10 PingMath + 2 ServerProbe + 1 LiveEmission + 4 UpdateChecker + 6 QualityScore) |
+| Publication | **GitHub Release `v1.2.0`** (https://github.com/wilson1442/nimbus-speedtest/releases/tag/v1.2.0) — signed APK attached as asset `nimbus-speedtest-1.2.0-v6-signed.apk`; served bytes verified byte-identical to `handoff/`, new UI classes (QualityScore/QualityHero/LatencyCard) confirmed present in the shipped DEX. (In-script publish hit a persistent GitHub-API 500 across all 3 retries and correctly FAILED LOUD; release created manually via `gh` and verified. Builder's publish route unused, §23.) |
 | Source repo | `https://github.com/wilson1442/nimbus-speedtest` (public, `main`) — local path `F:\hermes-work\coder\nimbus-speedtest`; release keystore is NOT in the repo (apk-builder holds it) |
+
+## v1.2.0 change (2026-10-03) — latency becomes a first-class, always-visible result
+
+**Why:** the speed test *was* measuring ping (median of 10 × `empty.php` RTTs), but the user saw "no ping results." Two separate bugs + one missing-metric gap:
+
+- **Ping card was hidden after the ping phase.** On the Test screen `if (test.phase == PING)MetricCard("Ping",…)` removed the Ping metric the instant the phase moved to DOWNLOAD/UPLOAD, so by the time the user looked, latency was gone from the live view.
+- **Unmeasured ping rendered as a bare `0`**, not an em-dash, on the Home "Last test" and PING card — read as "zero ms" (fastest possible) instead of "unknown."
+- **No min/max context**, and no single "how good is this" number.
+
+**Fix (v1.2.0):**
+- Test screen: **Ping/Jitter/Packet-loss is now an always-present cluster** (was Ping-conditional). Ping is an accent `LatencyCard` that flags **not measured** in the warn colour when the box can't reach `empty.php`, instead of a dim em-dash. Label flips `ms · live` → `ms · final`.
+- Results screen: new **Quality hero** — median ping (1 dp) **always shown** with **min/max/jitter/loss** inline, plus a **0-100 quality score + grade** (Excellent/Great/Good/Fair/Poor, colour-coded). PING card line now reports min **and** max.
+- Home: "Last test" ping shows an em-dash (not 0) when unmeasured.
+- `QualityScore` (engine/): pure, unit-tested 0-100 + grade from the numbers a run already produces — **no new DB column**. Download 40 / upload 25 / ping 15 / jitter 10 / loss 10, each log/linear-eased to 0..1. **Unmeasured ping (0.0) is neutral (0.60), not a hard zero**, so a box that can speed-test but not ping a specific endpoint isn't punished to the floor.
+- (Pre-existing uncommitted work also shipped this round, in service of the same concern): a **Settings → "Test connection"** probe (`probeServer`) that reports latency or a human-readable failure reason, `min_ping_ms`/`peak_mbps` persisted (Room v1→v2 migration), and `ServerProbeTest`.
+
+**Note on the real "no ping":** `empty.php` was probed live and returns **200 in ~40–50 ms** — the server and engine are healthy. So a *blank* ping on the user's TV almost certainly means that specific box/network failed to reach the endpoint (TLS/handshake/CDN/DNS), in which case v1.2.0 now says **"not measured"** and points them to Settings → Test connection, instead of silently showing 0.
+
+- **Tests:** 23/23 (10 PingMath · 2 ServerProbe · 1 LiveEmission · 4 UpdateChecker · **6 QualityScore (new)**). Build ~25 s green.
+- **Shipped APK classes verified:** `QualityScore`, `QualityHero`, `LatencyCard`, `Excellent`, `median`, `not measured` all present in the signed `v6` DEX (not a cache).
+- versionCode 5 → 6, versionName 1.1.1 → 1.2.0.
 
 ## v1.1.1 change (2026-10-03) — BACK no longer exits the app from Home
 
@@ -62,19 +83,21 @@
 - Baked in a public LibreSpeed-compatible default speed-test server (NYC, Clouvider) so the app runs out-of-the-box; the in-app Settings server field still overrides it at runtime. Source: official LibreSpeed backend-server list (`https://librespeed.org/backend-servers/servers.php`, 22 servers probed; NYC chosen — lowest US latency 121 ms, all three engine endpoints verified).
 - versionCode 1 → 2, versionName 1.0.0 → 1.0.1.
 
-## Verification evidence (current v1.1.1)
+## Verification evidence (current v1.2.0)
 
-- `v5-badging.txt` — aapt dump badging (versionCode 5 / 1.1.1, minSdk 24 / target 35, leanback+touchscreen optional)
-- `v5-apksigner.txt` — apksigner verify --verbose --print-certs (v2+v3, cert 1940e036…f72)
-- `v5-sha256.txt` — sha256sum (2a3d376b…db5a)
-- Update-feed check: unauthenticated `GET /releases/latest` returns tag v1.1.1, body tail `nimbus-versionCode=5`, asset `nimbus-speedtest-1.1.1-v5-signed.apk`; served download byte-identical to `handoff/`
-- `release-111.log` — full `./release.sh v1.1.1 5` transcript (builder build e3627e29; publish section shows the failed-loud GitHub 500)
-- (superseded) `v4-*.txt` (v1.1.0), `v3-*.txt` (v1.0.2), `v2-*.txt` (v1.0.1), `signed-*.txt` (v1.0.0)
+- `v6-badging.txt` — aapt dump badging (versionCode 6 / 1.2.0, minSdk 24 / target 35)
+- `v6-apksigner.txt` — apksigner verify --verbose --print-certs (v2+v3, cert 1940e036…f72)
+- `v6-sha256.txt` — sha256sum (bda6b95e…ecc5b)
+- Update-feed check: unauthenticated `GET /releases/latest` returns tag v1.2.0, body tail `nimbus-versionCode=6`, asset `nimbus-speedtest-1.2.0-v6-signed.apk` (8,183,128 bytes); served download **byte-identical** to `handoff/`
+- DEX class probe: `QualityScore`, `QualityHero`, `LatencyCard`, `Excellent`, `median`, `not measured` all present in the signed v6 APK
+- `release-120.log` — full `./release.sh v1.2.0 6` transcript (builder build 007f6686; publish section shows the failed-loud GitHub 500)
+- `build-latency.log` — local `assembleDebug testDebugUnitTest` (23/23 green)
+- (superseded) `v5-*.txt` (v1.1.1), `v4-*.txt` (v1.1.0), `v3-*.txt` (v1.0.2), `v2-*.txt` (v1.0.1), `signed-*.txt` (v1.0.0)
 
 ## Artifacts
 
-- **`nimbus-speedtest-1.1.1-v5-signed.apk`** — current production-signed release (keystore id=7, BACK navigation fix + in-app updater). Also attached to GitHub Release `v1.1.1` (verified byte-identical).
-- `nimbus-speedtest-1.1.0-v4-signed.apk` — previous release (in-app update checker), superseded.
+- **`nimbus-speedtest-1.2.0-v6-signed.apk`** — current production-signed release (keystore id=7, latency-as-first-class + quality score + Test-connection probe + BACK fix + in-app updater). Also attached to GitHub Release `v1.2.0` (verified byte-identical).
+- `nimbus-speedtest-1.1.1-v5-signed.apk` — previous release (BACK navigation fix + in-app updater), superseded.
 - `nimbus-speedtest-1.0.2-v3-signed.apk` — previous release (realtime bandwidth), superseded.
 - `nimbus-speedtest-1.0.1-v2-signed.apk` — superseded.
 - `nimbus-speedtest-1.0.0-v1-signed.apk` — superseded.
