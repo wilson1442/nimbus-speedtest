@@ -12,9 +12,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
@@ -28,13 +27,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Size
 import androidx.compose.material3.Text
-import cloud.g3h.nimbus.net.SpeedServer
 import cloud.g3h.nimbus.net.SpeedServers
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -102,14 +105,17 @@ fun HomeScreen(
             )
         }
 
-        // ---- location selector: pick the speed-test server's region, with its flag ----
-        val serverList = rememberLazyListState()
-        val selIndex = remember(settings.serverUrl) {
-            SpeedServers.ALL.indexOfFirst {
-                it.url.trimEnd('/').equals(settings.serverUrl.trim().trimEnd('/'), ignoreCase = true)
-            }
+        // ---- location selector: a dropdown (flag + city), D-pad friendly ----
+        var locationMenuOpen by remember { mutableStateOf(false) }
+        val locationLabel = SpeedServers.displayName(settings.serverUrl)
+        val locationFlag = remember(settings.serverUrl) {
+            SpeedServers.forUrl(settings.serverUrl)?.flag ?: SpeedServers.CUSTOM_FLAG
         }
-        LaunchedEffect(selIndex) { if (selIndex >= 0) serverList.animateScrollToItem(selIndex) }
+        // BACK closes the dropdown even if the popup doesn't consume the key.
+        DisposableEffect(locationMenuOpen) {
+            vm.dialogBack = if (locationMenuOpen) { { locationMenuOpen = false } } else null
+            onDispose { vm.dialogBack = null }
+        }
         Row(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -119,20 +125,26 @@ fun HomeScreen(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             SectionLabel("Location")
-            LazyRow(
-                state = serverList,
-                modifier = Modifier.weight(1f),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(SpeedServers.ALL, key = { it.url }) { server ->
-                    LocationChip(
-                        server = server,
-                        selected = server.url.trimEnd('/')
-                            .equals(settings.serverUrl.trim().trimEnd('/'), ignoreCase = true),
-                        onClick = {
-                            vm.setServerUrl(server.url)
-                            vm.testServer(server.url)   // probe it straight away
-                        }
+            Box {
+                LocationDropdownTrigger(
+                    flag = locationFlag,
+                    label = locationLabel,
+                    open = locationMenuOpen,
+                    onClick = { locationMenuOpen = !locationMenuOpen }
+                )
+                if (locationMenuOpen) {
+                    LocationDropdown(
+                        currentUrl = settings.serverUrl,
+                        onPick = { url ->
+                            vm.setServerUrl(url)
+                            vm.testServer(url)   // probe it straight away
+                            locationMenuOpen = false
+                        },
+                        onCustom = {
+                            locationMenuOpen = false
+                            vm.navigate(Screen.SETTINGS)
+                        },
+                        onDismiss = { locationMenuOpen = false }
                     )
                 }
             }
@@ -298,27 +310,159 @@ fun HomeScreen(
     }
 }
 
-/** One location option on the Home selector: flag + short city, ticked when active. */
+/** The collapsed control: current flag + location + a chevron, opens the list. */
 @Composable
-private fun LocationChip(server: SpeedServer, selected: Boolean, onClick: () -> Unit) {
+private fun LocationDropdownTrigger(flag: Int, label: String, open: Boolean, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .nimbusFocus(cornerRadius = 999.dp, ringThickness = 2.dp, gap = 4.dp)
-            .background(if (selected) BlueStrong else Surface, RoundedCornerShape(999.dp))
-            .border(1.dp, if (selected) BlueStrong else Line, RoundedCornerShape(999.dp))
+            .background(if (open) Tint else Surface, RoundedCornerShape(999.dp))
+            .border(
+                1.dp,
+                if (open) BlueStrong else Line,
+                RoundedCornerShape(999.dp)
+            )
             .clickable(onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 6.dp),
+            .padding(start = 13.dp, end = 11.dp, top = 7.dp, bottom = 7.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(7.dp)
+        horizontalArrangement = Arrangement.spacedBy(9.dp)
     ) {
-        FlagImage(server.flag, Modifier.size(width = 20.dp, height = 14.dp))
+        FlagImage(flag, Modifier.size(width = 20.dp, height = 14.dp))
         Text(
-            server.shortName,
-            fontSize = 11.sp,
-            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-            color = if (selected) Surface else Ink,
+            label,
+            fontSize = 11.5.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = Ink,
             fontFamily = ChakraPetch
         )
+        Chevron(open = open, color = if (open) BlueStrong else Ink2)
+    }
+}
+
+/** Small triangle/chevron that flips when the dropdown is open. */
+@Composable
+private fun Chevron(open: Boolean, color: Color) {
+    Canvas(Modifier.size(9.dp)) {
+        val w = size.width
+        val h = size.height
+        val path = androidx.compose.ui.graphics.Path().apply {
+            if (open) {          // points up when expanded
+                moveTo(0f, h * 0.62f); lineTo(w * 0.5f, h * 0.30f); lineTo(w, h * 0.62f)
+            } else {             // points down when collapsed
+                moveTo(0f, h * 0.38f); lineTo(w * 0.5f, h * 0.70f); lineTo(w, h * 0.38f)
+            }
+        }
+        drawPath(path, color, style = Stroke(width = 1.6.dp.toPx(), cap = StrokeCap.Round,
+            join = androidx.compose.ui.graphics.StrokeJoin.Round))
+    }
+}
+
+/**
+ * The expanded list, hanging directly under the trigger. A focusable [Popup] so the
+ * D-pad drives it and BACK dismisses it; focus starts on the current location.
+ */
+@Composable
+private fun LocationDropdown(
+    currentUrl: String,
+    onPick: (String) -> Unit,
+    onCustom: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val selectedIndex = SpeedServers.ALL.indexOfFirst {
+        it.url.trimEnd('/').equals(currentUrl.trim().trimEnd('/'), ignoreCase = true)
+    }
+    val selectedFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { runCatching { selectedFocus.requestFocus() } }
+    val gap = with(LocalDensity.current) { 8.dp.roundToPx() }
+
+    Popup(
+        alignment = Alignment.BottomStart,     // hangs below the trigger
+        offset = IntOffset(0, gap),
+        onDismissRequest = onDismiss,
+        properties = PopupProperties(focusable = true)
+    ) {
+        Column(
+            modifier = Modifier
+                .width(298.dp)
+                .heightIn(max = 412.dp)
+                .verticalScroll(rememberScrollState())
+                .background(Surface, RoundedCornerShape(12.dp))
+                .border(1.dp, Line, RoundedCornerShape(12.dp))
+                .padding(6.dp),
+            verticalArrangement = Arrangement.spacedBy(1.dp)
+        ) {
+            Text(
+                "SPEED TEST LOCATION",
+                modifier = Modifier.padding(start = 9.dp, top = 4.dp, bottom = 4.dp),
+                fontSize = 7.5.sp,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 1.2.sp,
+                color = Ink2,
+                fontFamily = ChakraPetch
+            )
+            SpeedServers.ALL.forEachIndexed { index, server ->
+                val selected = index == selectedIndex
+                LocationRow(
+                    flag = server.flag,
+                    title = server.shortName,
+                    subtitle = server.region,
+                    selected = selected,
+                    onClick = { onPick(server.url) },
+                    modifier = if (selected) Modifier.focusRequester(selectedFocus) else Modifier
+                )
+            }
+            LocationRow(
+                flag = SpeedServers.CUSTOM_FLAG,
+                title = "Custom URL…",
+                subtitle = "Manual",
+                selected = selectedIndex < 0,
+                onClick = onCustom,
+                modifier = if (selectedIndex < 0) Modifier.focusRequester(selectedFocus) else Modifier
+            )
+        }
+    }
+}
+
+/** One row of the dropdown: flag, city, region, tick when current. */
+@Composable
+private fun LocationRow(
+    flag: Int,
+    title: String,
+    subtitle: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .nimbusFocus(cornerRadius = 8.dp, ringThickness = 1.5.dp, gap = 2.dp)
+            .background(if (selected) Tint else Color.Transparent, RoundedCornerShape(8.dp))
+            .border(1.dp, if (selected) CardBorderActive else Color.Transparent, RoundedCornerShape(8.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 9.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        FlagImage(flag, Modifier.size(width = 20.dp, height = 14.dp))
+        Spacer(Modifier.width(9.dp))
+        Text(
+            title,
+            modifier = Modifier.weight(1f),
+            fontSize = 11.5.sp,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+            color = Ink, fontFamily = ChakraPetch,
+            maxLines = 1, overflow = TextOverflow.Ellipsis
+        )
+        Text(
+            subtitle,
+            fontSize = 8.5.sp,
+            fontWeight = FontWeight.Medium,
+            color = Ink2, fontFamily = ChakraPetch
+        )
+        if (selected) {
+            Spacer(Modifier.width(7.dp))
+            CheckIcon(BlueStrong, Modifier.size(11.dp))
+        }
     }
 }
 
