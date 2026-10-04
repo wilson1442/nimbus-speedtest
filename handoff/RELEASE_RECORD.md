@@ -4,16 +4,16 @@
 |---|---|
 | App name | Nimbus Speed Test |
 | Package ID | cloud.g3h.nimbus |
-| versionName | **1.7.3** (current) — 1.7.2, 1.7.1, 1.7.0, 1.6.0, 1.5.0, 1.4.0, 1.3.0, 1.2.1, 1.2.0, 1.1.1, 1.1.0, 1.0.2, 1.0.1, 1.0.0 (superseded) |
-| versionCode | **15** (current) — 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 (builder `GET /api/v1/builds` history hangs server-side, noted gap per standard §22.3) |
+| versionName | **1.7.4** (current) — 1.7.3, 1.7.2, 1.7.1, 1.7.0, 1.6.0, 1.5.0, 1.4.0, 1.3.0, 1.2.1, 1.2.0, 1.1.1, 1.1.0, 1.0.2, 1.0.1, 1.0.0 (superseded) |
+| versionCode | **16** (current) — 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 (builder `GET /api/v1/builds` history hangs server-side, noted gap per standard §22.3) |
 | Build format | apk (zipaligned, apksigner v2+v3) |
 | Keystore | id=7, name "nimbus", alias `nimbus-key` (created 2026-10-03 14:03) |
-| Builder buildId | **7c812b2f-37b2-49aa-9782-656845e1da59** (current) · 3d056b7f-b6d6-4925-9db7-19238d0be45f (v1.7.2) · 04f218c1-e37d-45ed-bef0-dda996f9ed3d (v1.7.1) · 81b227b8-3a74-45f4-a6d9-c7bb5724fbd4 (v1.7.0) · 1f17daed-1f1e-4b9c-b623-91ea924f2417 (v1.6.0) · 5ff126ae-16cb-494a-a7f8-e84ccbe5f061 (v1.5.0) · ed316b2f-f698-46dd-abbb-959a8b0261c4 (v1.4.0) · 2472f5e5-bc82-4ec0-9324-693d1721ed3c (v1.3.0) · 1ecfd3b9-dd70-4ff4-aa24-bd2a8db8eff3 (v1.2.1) · 007f6686-bb0f-4be4-a80c-ad7e4a0ac5c9 (v1.2.0) · e3627e29-055f-4903-84ec-cc7fcd9b8c37 (v1.1.1) · 76c8d384-24a0-4dbd-b7a4-b5b96874f4f2 (v1.1.0) · 8bc85e33-328b-4fea-af65-af2b43aeee56 (v1.0.2) · 0e5c4e26-43bd-452b-b724-36b3107a490b (v1.0.1) · da74e82f-24f7-44ee-a05a-56ee49999d47 (v1.0.0) |
+| Builder buildId | **8dee7f8f-149f-4e22-a05b-2373a3b55dc5** (current) · 7c812b2f-37b2-49aa-9782-656845e1da59 (v1.7.3) · 3d056b7f-b6d6-4925-9db7-19238d0be45f (v1.7.2) · 04f218c1-e37d-45ed-bef0-dda996f9ed3d (v1.7.1) · 81b227b8-3a74-45f4-a6d9-c7bb5724fbd4 (v1.7.0) · 1f17daed-1f1e-4b9c-b623-91ea924f2417 (v1.6.0) · 5ff126ae-16cb-494a-a7f8-e84ccbe5f061 (v1.5.0) · ed316b2f-f698-46dd-abbb-959a8b0261c4 (v1.4.0) · 2472f5e5-bc82-4ec0-9324-693d1721ed3c (v1.3.0) · 1ecfd3b9-dd70-4ff4-aa24-bd2a8db8eff3 (v1.2.1) · 007f6686-bb0f-4be4-a80c-ad7e4a0ac5c9 (v1.2.0) · e3627e29-055f-4903-84ec-cc7fcd9b8c37 (v1.1.1) · 76c8d384-24a0-4dbd-b7a4-b5b96874f4f2 (v1.1.0) · 8bc85e33-328b-4fea-af65-af2b43aeee56 (v1.0.2) · 0e5c4e26-43bd-452b-b724-36b3107a490b (v1.0.1) · da74e82f-24f7-44ee-a05a-56ee49999d47 (v1.0.0) |
 | App type | id=9 "Nimbus Speed Test" (created 2026-10-03 via skill-key `POST /api/v1/app-types`, defaultPackage cloud.g3h.nimbus, no template — archive-driven; note: `appName` form field is REQUIRED on `POST /api/v1/builds` or the API returns 400) |
-| Source | git repo `wilson1442/nimbus-speedtest` @ tag `v1.7.3` (commit `da9a43adf1c0`) — previous releases: `v1.7.2` (`25ae93e399ce`), `v1.7.1` (`3c40933b1bf2`), `v1.7.0` (`8ac7384d2b7b`), `v1.6.0` (`d17394bb2b8a`), `v1.5.0` (`f2361608006f`), `v1.4.0` (`bfffbac1b164`), `v1.3.0` (`5f08c336975f`), `v1.2.1` (`883f4488028f`), `v1.2.0` (`dbb548a71f0b`), `v1.1.1` (`9bd8b3168b23`), `v1.1.0` (`b74cd544ce66`), `v1.0.2` (`233b711b9e6e`), v1.0.1/v1.0.0 (archive) |
+| Source | git repo `wilson1442/nimbus-speedtest` @ tag `v1.7.4` (commit `05f9c37`) — previous releases: `v1.7.3` (`da9a43adf1c0`), `v1.7.2` (`25ae93e399ce`), `v1.7.1` (`3c40933b1bf2`), `v1.7.0` (`8ac7384d2b7b`), `v1.6.0` (`d17394bb2b8a`), `v1.5.0` (`f2361608006f`), `v1.4.0` (`bfffbac1b164`), `v1.3.0` (`5f08c336975f`), `v1.2.1` (`883f4488028f`), `v1.2.0` (`dbb548a71f0b`), `v1.1.1` (`9bd8b3168b23`), `v1.1.0` (`b74cd544ce66`), `v1.0.2` (`233b711b9e6e`), v1.0.1/v1.0.0 (archive) |
 | Build status | completed |
-| Built at | 2026-10-03 (builder local time, via `./release.sh v1.7.3 15`) |
-| APK SHA-256 | **dd6574d1f21c2f6525fd4a18ac189da3f4f37963edb4f32fdd5a56db0854eb42** (current) · 4596c6d736fbafd869fbfd71490e44d1b12caa103dd9e9701c643ed94f73c76a (v1.7.2) · 2e9896bf627a94c8c8c2e7832b31f8eeb6e339a6b7d98c6f18c9ec7038e7244f (v1.7.1) · 95f2964046a020a7b9a8300071988a889eb450807cfa2a6fdbede0a7a53fbca3 (v1.7.0) · 9ccd393a08c6ae0e6b227701a31c9023d07ff31c995729f575f43fcd2947f10f (v1.6.0) · a2c592800594eb586990e6694012e4d98bae09a48437f55f9cc95690c7f0f779 (v1.5.0) · 1c8b8e7c3adbedb5e60d64b74d7168bbb900b14a722be736319bd288b8f22a2b (v1.4.0) · a3b462c8c4efba67d497811557bdb002393c67073340df5de3a47f91a8c21f59 (v1.3.0) · 7c1508620bdd4199a25e4601ef8bc9e48f9dbce749163443b5aa2681cb4e43fc (v1.2.1) · bda6b95ebb43fc0212fb6ad03d3248b33807b77527a6964d09e8fdc59f1ecc5b (v1.2.0) · 2a3d376b39518fd49b130349f2cefba24496ca3d4ac1a711275fb1c5c5f9db5a (v1.1.1) · 25e88002f45da675f0b83820f25145cd13759572949c83b43aa20b6ffa4862b6 (v1.1.0) · e91c7b73fbf2e61360b47dc98e3743d285f805d1d070c8a3de909ac317996060 (v1.0.2) · bf7523399ee0edf18ffaf408b71f24a2904c5fb8d0359837f9a407085b60508a (v1.0.1) · b575d33c11d53e3415e79a4914dea2e4ee19bf6c872d4d3c8d95fb993c7089d7 (v1.0.0) |
+| Built at | 2026-10-03 (builder local time, via `./release.sh v1.7.4 16`) |
+| APK SHA-256 | **2e30c8aa763bc544b95745b5f3f0d94c725a26093bd959e34cd53aea827b48ad** (current) · dd6574d1f21c2f6525fd4a18ac189da3f4f37963edb4f32fdd5a56db0854eb42 (v1.7.3) · 4596c6d736fbafd869fbfd71490e44d1b12caa103dd9e9701c643ed94f73c76a (v1.7.2) · 2e9896bf627a94c8c8c2e7832b31f8eeb6e339a6b7d98c6f18c9ec7038e7244f (v1.7.1) · 95f2964046a020a7b9a8300071988a889eb450807cfa2a6fdbede0a7a53fbca3 (v1.7.0) · 9ccd393a08c6ae0e6b227701a31c9023d07ff31c995729f575f43fcd2947f10f (v1.6.0) · a2c592800594eb586990e6694012e4d98bae09a48437f55f9cc95690c7f0f779 (v1.5.0) · 1c8b8e7c3adbedb5e60d64b74d7168bbb900b14a722be736319bd288b8f22a2b (v1.4.0) · a3b462c8c4efba67d497811557bdb002393c67073340df5de3a47f91a8c21f59 (v1.3.0) · 7c1508620bdd4199a25e4601ef8bc9e48f9dbce749163443b5aa2681cb4e43fc (v1.2.1) · bda6b95ebb43fc0212fb6ad03d3248b33807b77527a6964d09e8fdc59f1ecc5b (v1.2.0) · 2a3d376b39518fd49b130349f2cefba24496ca3d4ac1a711275fb1c5c5f9db5a (v1.1.1) · 25e88002f45da675f0b83820f25145cd13759572949c83b43aa20b6ffa4862b6 (v1.1.0) · e91c7b73fbf2e61360b47dc98e3743d285f805d1d070c8a3de909ac317996060 (v1.0.2) · bf7523399ee0edf18ffaf408b71f24a2904c5fb8d0359837f9a407085b60508a (v1.0.1) · b575d33c11d53e3415e79a4914dea2e4ee19bf6c872d4d3c8d95fb993c7089d7 (v1.0.0) |
 | APK size | 8,491,168 bytes |
 | Cert DN | CN=Nimbus Speed Test, O=Nimbus Speed Test, L=Unknown, ST=Unknown, C=US |
 | Cert SHA-256 | 1940e036fd139e4562882628ba98d6ab1247998490ba251cf71da41257865f72 (identical across all builds — upgrade-compatible) |
@@ -29,8 +29,8 @@
 | Placeholder scan | 0 unreplaced tokens in DEX |
 | Fonts bundled | chakrapetch regular/medium/semibold/bold + oxanium medium/semibold/bold (confirmed in resources.arsc) |
 | App code | MainActivity, LibreSpeedEngine, HomeScreen present in classes2.dex |
-| Local gate | assembleDebug EXIT=0; unit tests pass (42/42: 10 PingMath + 2 ServerProbe + 1 LiveEmission + 8 UpdateChecker + 6 QualityScore + 8 SpeedServers + 4 InstallResume + 3 FocusTreatment) |
-| Publication | **GitHub Release `v1.7.3`** (https://github.com/wilson1442/nimbus-speedtest/releases/tag/v1.7.3) — assets `nimbus-1.7.3-v15-signed.apk` and the alias `nimbus.apk`; both 200 / `application/vnd.android.package-archive` / 8,491,168 bytes, byte-identical to `handoff/`. DEX probe: the label constant-folds, and the APK contains **`v1.7.3`** while `v1.7.2` is absent — the new version string is the one shipped. Builder's publish route unused, §23. |
+| Local gate | assembleDebug EXIT=0; unit tests pass (47/47: 10 PingMath + 2 ServerProbe + 1 LiveEmission + 8 UpdateChecker + 6 QualityScore + 8 SpeedServers + 4 InstallResume + 3 FocusTreatment + 5 FocusSemantics) |
+| Publication | **GitHub Release `v1.7.4`** (https://github.com/wilson1442/nimbus-speedtest/releases/tag/v1.7.4) — assets `nimbus-1.7.4-v16-signed.apk` + alias `nimbus.apk`, both 200 / `application/vnd.android.package-archive` / 8,491,168 bytes, byte-identical to `handoff/`. Builder's publish route unused, §23. |
 | Source repo | `https://github.com/wilson1442/nimbus-speedtest` (public, `main`) — local path `F:\hermes-work\coder\nimbus-speedtest`; release keystore is NOT in the repo (apk-builder holds it) |
 
 ## v1.7.1 change (2026-10-03) — real logo inside the app, bigger on the dashboard
@@ -42,6 +42,27 @@ The in-app logo was a **hand-drawn placeholder** (`NimbusLogoTile`: a blue round
 - Verified by rendering the top bar at 1920×1080 with the real art (`handoff/inapp-topbar.png`): logo inside the 48 dp bar, 12 dp clear of the Location row, no seam; and by extracting the logo back out of the shipped APK (`handoff/shipped-inapp-logo.png`).
 
 **Tests:** 39/39 unchanged (the change is presentational).
+
+## v1.7.4 change (2026-10-03) — D-pad focus: the actual root cause
+
+**Reported twice.** v1.7.2 fixed how the ring was *drawn* (contrast 1.71:1 → 5.57:1, 3 dp floor) but not *whether* it was drawn. It never was, on any element.
+
+**Root cause — a one-line modifier-order bug.** `nimbusFocus` declared `.focusable()` **before** `.onFocusChanged{}`. Android's documentation states: *"the `onFocusChanged()` modifier refers to the first focusable element that appears **after** the `focusable()` or `focusTarget()` modifiers."* Declared the other way round it observes **nothing**, so the state the ring depends on never turns true and the ring never draws — silently, with no error or warning. Reordering to `.onFocusChanged{}.focusable()` fixes it.
+
+**Verified, not reasoned.** This release adds **Robolectric + Compose UI tests** so focus behaviour can be asserted on the JVM (there is no emulator in this setup). `FocusSemanticsTest` pins the mechanism in both directions:
+
+| test | result |
+|---|---|
+| `onFocusChanged` BEFORE `focusable` observes focus | passes |
+| `onFocusChanged` AFTER `focusable` observes **nothing** | passes — this is the shipping bug, reproduced |
+| which node wins focus when `clickable` is also in the chain | the `nimbusFocus` node (`isFocused=true`), and D-pad OK still activates `clickable` → no restructuring needed |
+| the real `nimbusFocus` element takes focus and responds to OK | passes |
+
+Also recorded: a **pixel-level** assertion ("the ring colour appears once focused") is not possible here — `captureToImage()` needs `@GraphicsMode(NATIVE)` to rasterise a window, and in NATIVE mode key injection stops reaching `clickable` (measured: clicks>0 → clicks=0). The mechanism is therefore pinned instead of the pixels; noted in the test file.
+
+Robolectric runs under `testOptions { unitTests { isIncludeAndroidResources = true } }` and fetches its `android-all` runtime on first use.
+
+**Tests:** 47/47 (was 42; +5 `FocusSemanticsTest`).
 
 ## v1.7.3 change (2026-10-03) — version number bottom-left of the dashboard
 
@@ -257,21 +278,21 @@ No user-visible feature change. Findings from a whole-codebase review, each veri
 - Baked in a public LibreSpeed-compatible default speed-test server (NYC, Clouvider) so the app runs out-of-the-box; the in-app Settings server field still overrides it at runtime. Source: official LibreSpeed backend-server list (`https://librespeed.org/backend-servers/servers.php`, 22 servers probed; NYC chosen — lowest US latency 121 ms, all three engine endpoints verified).
 - versionCode 1 → 2, versionName 1.0.0 → 1.0.1.
 
-## Verification evidence (current v1.7.3)
+## Verification evidence (current v1.7.4)
 
-- `v15-badging.txt` — aapt dump badging (versionCode 15 / 1.7.3, minSdk 24 / target 35)
-- `v15-apksigner.txt` — apksigner verify --verbose --print-certs (v2+v3 true, cert 1940e036…f72)
-- `v15-sha256.txt` — sha256sum (dd6574d1…0854eb42)
-- Update-feed check: `GET /releases/latest` returns tag v1.7.3, `nimbus-versionCode=15`, assets `nimbus-1.7.3-v15-signed.apk` + `nimbus.apk`; **both** download links 200 / `application/vnd.android.package-archive` / 8,491,168 bytes, byte-identical to `handoff/`
-- DEX probe: `v1.7.3` PRESENT, `v1.7.2` absent — the new version label is what shipped
-- `home-version-bottom-left.png` — the dashboard's bottom strip rendered at 1080p, confirming the label sits clear of the footer
-- `release-173.log` — full `./release.sh v1.7.3 15` transcript (builder build 7c812b2f; published by the script, stable link emitted)
-- `build-version.log` — local `assembleDebug testDebugUnitTest` (42/42 green)
-- (superseded) `v14-*.txt` (v1.7.2), `v13-*.txt` (v1.7.1), `v12-*.txt` (v1.7.0), `v11-*.txt` (v1.6.0), `v10-*.txt` (v1.5.0), `v9-*.txt` (v1.4.0), `v8-*.txt` (v1.3.0), `v7-*.txt` (v1.2.1), `v6-*.txt` (v1.2.0), `v5-*.txt` (v1.1.1), `v4-*.txt` (v1.1.0), `v3-*.txt` (v1.0.2), `v2-*.txt` (v1.0.1), `signed-*.txt` (v1.0.0)
+- `v16-badging.txt` — aapt dump badging (versionCode 16 / 1.7.4, minSdk 24 / target 35)
+- `v16-apksigner.txt` — apksigner verify --verbose --print-certs (v2+v3 true, cert 1940e036…f72)
+- `v16-sha256.txt` — sha256sum (2e30c8aa…827b48ad)
+- Update-feed check: `GET /releases/latest` returns tag v1.7.4, `nimbus-versionCode=16`, assets `nimbus-1.7.4-v16-signed.apk` + `nimbus.apk`; **both** links 200 / `application/vnd.android.package-archive` / 8,491,168 bytes, byte-identical to `handoff/`
+- **`FocusSemanticsTest` (5 tests)** — the real evidence for this fix: the framework rule is asserted in both directions, the shipping modifier is exercised, and the ordering is visible in `Focus.kt` under the "ORDER IS LOAD-BEARING" comment
+- `build-focusfix.log` — full local run (47/47 green, includes the Robolectric focus suite)
+- `build-focustest3.log` / `build-focustest4.log` / `build-focustest5.log` — the diagnostic runs that established the ordering rule and that NATIVE graphics mode breaks key injection
+- `release-174.log` — full `./release.sh v1.7.4 16` transcript (builder build 8dee7f8f; published by the script)
+- (superseded) `v15-*.txt` (v1.7.3), `v14-*.txt` (v1.7.2), `v13-*.txt` (v1.7.1), `v12-*.txt` (v1.7.0), `v11-*.txt` (v1.6.0), `v10-*.txt` (v1.5.0), `v9-*.txt` (v1.4.0), `v8-*.txt` (v1.3.0), `v7-*.txt` (v1.2.1), `v6-*.txt` (v1.2.0), `v5-*.txt` (v1.1.1), `v4-*.txt` (v1.1.0), `v3-*.txt` (v1.0.2), `v2-*.txt` (v1.0.1), `signed-*.txt` (v1.0.0)
 
 ## Artifacts
 
-- **`nimbus-1.7.3-v15-signed.apk`** — current production-signed release (keystore id=7; unmistakable D-pad focus: 3 dp deep-blue ring + glow, no focusable scrims, modal traps focus) (keystore id=7; real brand logo in-app at 42 dp, logo launcher icon + TV banner, update installs on return from the permission toggle, Home location dropdown, update prompt on every launch, country flags). Also attached to GitHub Release `v1.7.1` (verified byte-identical).
+- **`nimbus-1.7.4-v16-signed.apk`** — current production-signed release (keystore id=7; D-pad focus actually works) (keystore id=7; unmistakable D-pad focus: 3 dp deep-blue ring + glow, no focusable scrims, modal traps focus) (keystore id=7; real brand logo in-app at 42 dp, logo launcher icon + TV banner, update installs on return from the permission toggle, Home location dropdown, update prompt on every launch, country flags). Also attached to GitHub Release `v1.7.1` (verified byte-identical).
 - `nimbus-speedtest-1.7.0-v12-signed.apk` — previous release (logo launcher icon), superseded.
 - `nimbus-speedtest-1.0.2-v3-signed.apk` — previous release (realtime bandwidth), superseded.
 - `nimbus-speedtest-1.0.1-v2-signed.apk` — superseded.
