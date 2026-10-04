@@ -4,16 +4,16 @@
 |---|---|
 | App name | Nimbus Speed Test |
 | Package ID | cloud.g3h.nimbus |
-| versionName | **1.5.0** (current) — 1.4.0, 1.3.0, 1.2.1, 1.2.0, 1.1.1, 1.1.0, 1.0.2, 1.0.1, 1.0.0 (superseded) |
-| versionCode | **10** (current) — 9, 8, 7, 6, 5, 4, 3, 2, 1 (builder `GET /api/v1/builds` history hangs server-side, noted gap per standard §22.3) |
+| versionName | **1.6.0** (current) — 1.5.0, 1.4.0, 1.3.0, 1.2.1, 1.2.0, 1.1.1, 1.1.0, 1.0.2, 1.0.1, 1.0.0 (superseded) |
+| versionCode | **11** (current) — 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 (builder `GET /api/v1/builds` history hangs server-side, noted gap per standard §22.3) |
 | Build format | apk (zipaligned, apksigner v2+v3) |
 | Keystore | id=7, name "nimbus", alias `nimbus-key` (created 2026-10-03 14:03) |
-| Builder buildId | **5ff126ae-16cb-494a-a7f8-e84ccbe5f061** (current) · ed316b2f-f698-46dd-abbb-959a8b0261c4 (v1.4.0) · 2472f5e5-bc82-4ec0-9324-693d1721ed3c (v1.3.0) · 1ecfd3b9-dd70-4ff4-aa24-bd2a8db8eff3 (v1.2.1) · 007f6686-bb0f-4be4-a80c-ad7e4a0ac5c9 (v1.2.0) · e3627e29-055f-4903-84ec-cc7fcd9b8c37 (v1.1.1) · 76c8d384-24a0-4dbd-b7a4-b5b96874f4f2 (v1.1.0) · 8bc85e33-328b-4fea-af65-af2b43aeee56 (v1.0.2) · 0e5c4e26-43bd-452b-b724-36b3107a490b (v1.0.1) · da74e82f-24f7-44ee-a05a-56ee49999d47 (v1.0.0) |
+| Builder buildId | **1f17daed-1f1e-4b9c-b623-91ea924f2417** (current) · 5ff126ae-16cb-494a-a7f8-e84ccbe5f061 (v1.5.0) · ed316b2f-f698-46dd-abbb-959a8b0261c4 (v1.4.0) · 2472f5e5-bc82-4ec0-9324-693d1721ed3c (v1.3.0) · 1ecfd3b9-dd70-4ff4-aa24-bd2a8db8eff3 (v1.2.1) · 007f6686-bb0f-4be4-a80c-ad7e4a0ac5c9 (v1.2.0) · e3627e29-055f-4903-84ec-cc7fcd9b8c37 (v1.1.1) · 76c8d384-24a0-4dbd-b7a4-b5b96874f4f2 (v1.1.0) · 8bc85e33-328b-4fea-af65-af2b43aeee56 (v1.0.2) · 0e5c4e26-43bd-452b-b724-36b3107a490b (v1.0.1) · da74e82f-24f7-44ee-a05a-56ee49999d47 (v1.0.0) |
 | App type | id=9 "Nimbus Speed Test" (created 2026-10-03 via skill-key `POST /api/v1/app-types`, defaultPackage cloud.g3h.nimbus, no template — archive-driven; note: `appName` form field is REQUIRED on `POST /api/v1/builds` or the API returns 400) |
-| Source | git repo `wilson1442/nimbus-speedtest` @ tag `v1.5.0` (commit `f2361608006f`) — previous releases: `v1.4.0` (`bfffbac1b164`), `v1.3.0` (`5f08c336975f`), `v1.2.1` (`883f4488028f`), `v1.2.0` (`dbb548a71f0b`), `v1.1.1` (`9bd8b3168b23`), `v1.1.0` (`b74cd544ce66`), `v1.0.2` (`233b711b9e6e`), v1.0.1/v1.0.0 (archive) |
+| Source | git repo `wilson1442/nimbus-speedtest` @ tag `v1.6.0` (commit `d17394bb2b8a`) — previous releases: `v1.5.0` (`f2361608006f`), `v1.4.0` (`bfffbac1b164`), `v1.3.0` (`5f08c336975f`), `v1.2.1` (`883f4488028f`), `v1.2.0` (`dbb548a71f0b`), `v1.1.1` (`9bd8b3168b23`), `v1.1.0` (`b74cd544ce66`), `v1.0.2` (`233b711b9e6e`), v1.0.1/v1.0.0 (archive) |
 | Build status | completed |
-| Built at | 2026-10-03 (builder local time, via `./release.sh v1.5.0 10`) |
-| APK SHA-256 | **a2c592800594eb586990e6694012e4d98bae09a48437f55f9cc95690c7f0f779** (current) · 1c8b8e7c3adbedb5e60d64b74d7168bbb900b14a722be736319bd288b8f22a2b (v1.4.0) · a3b462c8c4efba67d497811557bdb002393c67073340df5de3a47f91a8c21f59 (v1.3.0) · 7c1508620bdd4199a25e4601ef8bc9e48f9dbce749163443b5aa2681cb4e43fc (v1.2.1) · bda6b95ebb43fc0212fb6ad03d3248b33807b77527a6964d09e8fdc59f1ecc5b (v1.2.0) · 2a3d376b39518fd49b130349f2cefba24496ca3d4ac1a711275fb1c5c5f9db5a (v1.1.1) · 25e88002f45da675f0b83820f25145cd13759572949c83b43aa20b6ffa4862b6 (v1.1.0) · e91c7b73fbf2e61360b47dc98e3743d285f805d1d070c8a3de909ac317996060 (v1.0.2) · bf7523399ee0edf18ffaf408b71f24a2904c5fb8d0359837f9a407085b60508a (v1.0.1) · b575d33c11d53e3415e79a4914dea2e4ee19bf6c872d4d3c8d95fb993c7089d7 (v1.0.0) |
+| Built at | 2026-10-03 (builder local time, via `./release.sh v1.6.0 11`) |
+| APK SHA-256 | **9ccd393a08c6ae0e6b227701a31c9023d07ff31c995729f575f43fcd2947f10f** (current) · a2c592800594eb586990e6694012e4d98bae09a48437f55f9cc95690c7f0f779 (v1.5.0) · 1c8b8e7c3adbedb5e60d64b74d7168bbb900b14a722be736319bd288b8f22a2b (v1.4.0) · a3b462c8c4efba67d497811557bdb002393c67073340df5de3a47f91a8c21f59 (v1.3.0) · 7c1508620bdd4199a25e4601ef8bc9e48f9dbce749163443b5aa2681cb4e43fc (v1.2.1) · bda6b95ebb43fc0212fb6ad03d3248b33807b77527a6964d09e8fdc59f1ecc5b (v1.2.0) · 2a3d376b39518fd49b130349f2cefba24496ca3d4ac1a711275fb1c5c5f9db5a (v1.1.1) · 25e88002f45da675f0b83820f25145cd13759572949c83b43aa20b6ffa4862b6 (v1.1.0) · e91c7b73fbf2e61360b47dc98e3743d285f805d1d070c8a3de909ac317996060 (v1.0.2) · bf7523399ee0edf18ffaf408b71f24a2904c5fb8d0359837f9a407085b60508a (v1.0.1) · b575d33c11d53e3415e79a4914dea2e4ee19bf6c872d4d3c8d95fb993c7089d7 (v1.0.0) |
 | APK size | 8,204,000 bytes |
 | Cert DN | CN=Nimbus Speed Test, O=Nimbus Speed Test, L=Unknown, ST=Unknown, C=US |
 | Cert SHA-256 | 1940e036fd139e4562882628ba98d6ab1247998490ba251cf71da41257865f72 (identical across all builds — upgrade-compatible) |
@@ -30,8 +30,19 @@
 | Fonts bundled | chakrapetch regular/medium/semibold/bold + oxanium medium/semibold/bold (confirmed in resources.arsc) |
 | App code | MainActivity, LibreSpeedEngine, HomeScreen present in classes2.dex |
 | Local gate | assembleDebug EXIT=0; unit tests pass (35/35: 10 PingMath + 2 ServerProbe + 1 LiveEmission + 8 UpdateChecker + 6 QualityScore + 8 SpeedServers) |
-| Publication | **GitHub Release `v1.5.0`** (https://github.com/wilson1442/nimbus-speedtest/releases/tag/v1.5.0) — signed APK attached as asset `nimbus-speedtest-1.5.0-v10-signed.apk`; published by `release.sh` (no API 500), served bytes verified byte-identical to `handoff/`; `UpdatePrompt`/`LocationChip`/`MIN_CHECK_INTERVAL_MS` present in the DEX and all 7 flag resource names present in `resources.arsc`. Builder's publish route unused, §23. |
+| Publication | **GitHub Release `v1.6.0`** (https://github.com/wilson1442/nimbus-speedtest/releases/tag/v1.6.0) — signed APK attached as asset `nimbus-speedtest-1.6.0-v11-signed.apk`; published by `release.sh` (no API 500), served bytes verified byte-identical to `handoff/`; DEX probe confirms `LocationDropdown`/`LocationDropdownTrigger`/`Chevron`/`LocationRow` shipped, the old `LocationChip` is gone, and all 7 flag resource names are in `resources.arsc`. Builder's publish route unused, §23. |
 | Source repo | `https://github.com/wilson1442/nimbus-speedtest` (public, `main`) — local path `F:\hermes-work\coder\nimbus-speedtest`; release keystore is NOT in the repo (apk-builder holds it) |
+
+## v1.6.0 change (2026-10-03) — Home location selector is a dropdown list
+
+Replaces the v1.5.0 chip row with a real dropdown, as requested.
+
+- The collapsed control is a **pill** showing the current location's **flag + name** plus a chevron that flips when open.
+- Tapping it opens a **focusable `Popup`** anchored under the trigger (`Alignment.BottomStart`, so it hangs directly below) listing all 12 locations as **flag + city + region** rows, the active one highlighted and ticked (`CheckIcon`). Picking one applies it, probes it and closes; **Custom URL…** jumps to Settings. Focus starts on the current location; BACK dismisses (the popup consumes the key, with `vm.dialogBack` as a fallback).
+- **Height took two passes.** The first version's natural height was 887 px and its bottom edge landed at **1135 px — off the bottom of a 1080p screen**, so the last rows were unreachable and its `verticalScroll` would have scrolled focus out of view (a plain `Column` scroll does not track focus). Row padding 6→4 dp, item gaps 2→1 dp and a 412→400 dp cap bring it to **753 px with 40 dp to spare and no scrolling**.
+- Verified by rendering the dropdown at 1920×1080 (TV density 2.0) using the real theme colours and the **actual `pathData` from the flag drawables**, then measuring: `menu.bottom = 1000 ≤ 1080`, `needsScroll = false`, left edge aligned to the trigger. Evidence: `handoff/home-location-dropdown.png`.
+
+**Tests:** 35/35 unchanged (the selector is UI-only; the `SpeedServers` catalogue tests still cover the data behind it).
 
 ## v1.5.0 change (2026-10-03) — update prompt on every launch + Home location selector with flags
 
@@ -170,23 +181,22 @@ No user-visible feature change. Findings from a whole-codebase review, each veri
 - Baked in a public LibreSpeed-compatible default speed-test server (NYC, Clouvider) so the app runs out-of-the-box; the in-app Settings server field still overrides it at runtime. Source: official LibreSpeed backend-server list (`https://librespeed.org/backend-servers/servers.php`, 22 servers probed; NYC chosen — lowest US latency 121 ms, all three engine endpoints verified).
 - versionCode 1 → 2, versionName 1.0.0 → 1.0.1.
 
-## Verification evidence (current v1.5.0)
+## Verification evidence (current v1.6.0)
 
-- `v10-badging.txt` — aapt dump badging (versionCode 10 / 1.5.0, minSdk 24 / target 35, REQUEST_INSTALL_PACKAGES present)
-- `v10-apksigner.txt` — apksigner verify --verbose --print-certs (v2+v3 true, cert 1940e036…f72)
-- `v10-sha256.txt` — sha256sum (a2c59280…f0f779)
-- Update-feed check: unauthenticated `GET /releases/latest` returns tag v1.5.0, body tail `nimbus-versionCode=10`, asset `nimbus-speedtest-1.5.0-v10-signed.apk` (8,204,000 bytes); served download **byte-identical** to `handoff/`
-- DEX class probe: `UpdatePrompt`, `LocationChip`, `MIN_CHECK_INTERVAL_MS`, `updatePromptVisible`, `shortName` all present in the signed v10 APK
-- Resources probe: all 7 flag resource names (`flag_us/gb/nl/de/cz/jp`, `ic_globe`) present in `resources.arsc` (zip paths are shortened by the builder — see the v1.5.0 note)
-- `flags-preview.png` — the six flags rendered from the same coordinates, visually confirmed recognizable
-- `release-150.log` — full `./release.sh v1.5.0 10` transcript (builder build 5ff126ae; published by the script, no API 500)
-- `build-150.log` — local `assembleDebug testDebugUnitTest` (35/35 green)
-- (superseded) `v9-*.txt` (v1.4.0), `v8-*.txt` (v1.3.0), `v7-*.txt` (v1.2.1), `v6-*.txt` (v1.2.0), `v5-*.txt` (v1.1.1), `v4-*.txt` (v1.1.0), `v3-*.txt` (v1.0.2), `v2-*.txt` (v1.0.1), `signed-*.txt` (v1.0.0)
+- `v11-badging.txt` — aapt dump badging (versionCode 11 / 1.6.0, minSdk 24 / target 35)
+- `v11-apksigner.txt` — apksigner verify --verbose --print-certs (v2+v3 true, cert 1940e036…f72)
+- `v11-sha256.txt` — sha256sum (9ccd393a…947f10f)
+- Update-feed check: unauthenticated `GET /releases/latest` returns tag v1.6.0, body tail `nimbus-versionCode=11`, asset `nimbus-speedtest-1.6.0-v11-signed.apk` (8,204,000 bytes); served download **byte-identical** to `handoff/`
+- DEX probe: `LocationDropdown`, `LocationDropdownTrigger`, `Chevron`, `LocationRow`, `Custom URL` present; the superseded `LocationChip` **gone** (expected); all 7 flag resource names present in `resources.arsc`
+- `home-location-dropdown.png` — the dropdown rendered at 1920×1080 from the real theme colours + flag path data, measured to fit with 40 dp spare and no scrolling
+- `release-160.log` — full `./release.sh v1.6.0 11` transcript (builder build 1f17daed; published by the script, no API 500)
+- `build-dropdown2.log` — local `assembleDebug testDebugUnitTest` (35/35 green)
+- (superseded) `v10-*.txt` (v1.5.0), `v9-*.txt` (v1.4.0), `v8-*.txt` (v1.3.0), `v7-*.txt` (v1.2.1), `v6-*.txt` (v1.2.0), `v5-*.txt` (v1.1.1), `v4-*.txt` (v1.1.0), `v3-*.txt` (v1.0.2), `v2-*.txt` (v1.0.1), `signed-*.txt` (v1.0.0)
 
 ## Artifacts
 
-- **`nimbus-speedtest-1.5.0-v10-signed.apk`** — current production-signed release (keystore id=7; update prompt on every launch, Home location selector with country flags; carries the server catalogue, auto-update, latency/quality-score and codebase-review work). Also attached to GitHub Release `v1.5.0` (verified byte-identical).
-- `nimbus-speedtest-1.4.0-v9-signed.apk` — previous release (12-region server picker), superseded.
+- **`nimbus-speedtest-1.6.0-v11-signed.apk`** — current production-signed release (keystore id=7; Home location dropdown, update prompt on every launch, country flags; carries the server catalogue, auto-update, latency/quality-score and codebase-review work). Also attached to GitHub Release `v1.6.0` (verified byte-identical).
+- `nimbus-speedtest-1.5.0-v10-signed.apk` — previous release (chip-row selector), superseded.
 - `nimbus-speedtest-1.0.2-v3-signed.apk` — previous release (realtime bandwidth), superseded.
 - `nimbus-speedtest-1.0.1-v2-signed.apk` — superseded.
 - `nimbus-speedtest-1.0.0-v1-signed.apk` — superseded.

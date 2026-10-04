@@ -5,11 +5,11 @@ Speed test for Android TV and phones — **Kotlin + Jetpack Compose**, LibreSpee
 | | |
 |---|---|
 | Package | `cloud.g3h.nimbus` |
-| Current release | v1.5.0 / versionCode 10 (see `handoff/RELEASE_RECORD.md`) |
+| Current release | v1.6.0 / versionCode 11 (see `handoff/RELEASE_RECORD.md`) |
 | minSdk / targetSdk | 24 / 35 |
 | Leanback / touchscreen | both optional (one APK for TV + phones) |
 | Engine | LibreSpeed protocol: `empty.php` ping/upload · `garbage.php` download |
-| Default server | `https://nyc.speedtest.clouvider.net/backend` — pickable from the **Home screen** (flag + city chips) or Settings, from 12 verified public backends; any custom URL accepted |
+| Default server | `https://nyc.speedtest.clouvider.net/backend` — selectable from a **location dropdown on the Home screen** (or the Settings picker), from 12 verified public backends; any custom URL accepted |
 | Persistence | Room (test history) + DataStore (settings) |
 | UI | Compose 1.7.6, material3, D-pad focus, bundled Chakra Petch + Oxanium fonts |
 
@@ -89,7 +89,7 @@ Full suite: **33/33**.
 
 ## Speed-test servers
 
-A **Location** row on the Home screen (and Settings → *Speed test server → Choose*) lists 12 public LibreSpeed-compatible backends, each with its **country flag**:
+A **Location dropdown** on the Home screen (and the Settings → *Speed test server → Choose* picker) lists 12 public LibreSpeed-compatible backends, each with its **country flag**. The Home control is a pill showing the current location that opens a list hanging beneath it — flag + city + region per row, active row ticked; the whole list fits on screen without scrolling at 1080p.
 
 | Region | Servers | Flag |
 |---|---|---|
