@@ -16,6 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Text
+import cloud.g3h.nimbus.net.SpeedServer
+import cloud.g3h.nimbus.net.SpeedServers
 import kotlinx.coroutines.delay
 
 /** Settings screen (spec §3.5 — not designed; reuses house styles). */
@@ -27,12 +29,17 @@ fun SettingsScreen(
     val settings by vm.settings.collectAsState()
     val probe by vm.probe.collectAsState()
     var editing by remember { mutableStateOf<Pair<String, String>?>(null) }
+    var pickingServer by remember { mutableStateOf(false) }
 
-    // BACK closes an open settings dialog before doing anything else. Keyed on
-    // `editing` so the callback tracks the current dialog instead of being
-    // written during composition.
-    DisposableEffect(editing) {
-        vm.dialogBack = if (editing != null) { { editing = null } } else null
+    // BACK closes whichever dialog is open before doing anything else. Keyed on
+    // the open-dialog state so the callback tracks it instead of being written
+    // during composition.
+    DisposableEffect(editing, pickingServer) {
+        vm.dialogBack = when {
+            pickingServer -> { { pickingServer = false } }
+            editing != null -> { { editing = null } }
+            else -> null
+        }
         onDispose { vm.dialogBack = null }
     }
 
@@ -70,7 +77,7 @@ fun SettingsScreen(
             SettingsRow(
                 label = "Speed test server",
                 sub = if (settings.serverUrl.isBlank()) "Not set — required to run a test"
-                else settings.serverUrl,
+                else "${SpeedServers.displayName(settings.serverUrl)} · ${settings.serverUrl}",
                 trailing = {
                     if (vm.probe.value.checking) {
                         Text("Testing…", fontSize = 9.sp, color = Ink2)
@@ -81,7 +88,7 @@ fun SettingsScreen(
                     }
                     SecondaryButton("Test", onClick = { vm.testServer() }, sizeSp = 9f)
                     Spacer(Modifier.width(8.dp))
-                    SecondaryButton("Edit", onClick = { editing = "server" to settings.serverUrl }, sizeSp = 10f)
+                    SecondaryButton("Choose", onClick = { pickingServer = true }, sizeSp = 10f)
                 }
             )
             SettingsRow(
@@ -161,11 +168,138 @@ fun SettingsScreen(
             onDismiss = { editing = null }
         )
     }
+    if (pickingServer) {
+        ServerPickerDialog(
+            current = settings.serverUrl,
+            onPick = { url ->
+                vm.setServerUrl(url)
+                vm.testServer(url)   // immediately report reachability
+                pickingServer = false
+            },
+            onCustomUrl = {
+                pickingServer = false
+                editing = "server" to settings.serverUrl
+            },
+            onDismiss = { pickingServer = false }
+        )
+    }
     if (vm.history.value.confirmClear) {
         ConfirmClearDialog(
             onConfirm = { vm.confirmClearHistory() },
             onDismiss = { vm.dismissClearHistory() }
         )
+    }
+}
+
+/**
+ * Server picker: the curated public backends, grouped by region, with the
+ * current selection ticked. D-pad navigable; BACK or Cancel closes.
+ * "Custom URL…" falls through to the free-text entry dialog.
+ */
+@Composable
+private fun ServerPickerDialog(
+    current: String,
+    onPick: (String) -> Unit,
+    onCustomUrl: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val selectedUrl = current.trim().trimEnd('/')
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0x8022384E))
+            .clickable(onClick = onDismiss),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier
+                .width(600.dp)
+                .background(Surface, RoundedCornerShape(16.dp))
+                .border(1.dp, Line, RoundedCornerShape(16.dp))
+                .padding(22.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                "Speed test server",
+                fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Ink, fontFamily = ChakraPetch
+            )
+            Text(
+                "All verified working. Pick the region closest to you for the most accurate numbers.",
+                fontSize = 9.5.sp, color = Ink2, fontFamily = ChakraPetch
+            )
+            Spacer(Modifier.height(2.dp))
+
+            // Two columns so all presets + the custom row fit a 1080p TV height.
+            SpeedServers.ALL
+                .map { it to it.url.trimEnd('/').equals(selectedUrl, ignoreCase = true) }
+                .chunked(2)
+                .forEach { pair ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        pair.forEach { (server, isSel) ->
+                            ServerOption(
+                                server = server,
+                                selected = isSel,
+                                onClick = { onPick(server.url) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        if (pair.size == 1) Spacer(Modifier.weight(1f))
+                    }
+                }
+
+            // A manually-typed endpoint the catalogue doesn't cover.
+            val isCustom = selectedUrl.isNotBlank() && SpeedServers.forUrl(selectedUrl) == null
+            ServerOption(
+                server = SpeedServer(
+                    label = if (isCustom) "Custom: " + SpeedServers.displayName(current) else "Custom URL…",
+                    region = "Manual",
+                    url = current
+                ),
+                selected = isCustom,
+                onClick = onCustomUrl
+            )
+
+            Spacer(Modifier.height(4.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                SecondaryButton("Cancel", onClick = onDismiss, sizeSp = 11f)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ServerOption(
+    server: SpeedServer,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .nimbusFocus(cornerRadius = 10.dp, ringThickness = 1.5.dp, gap = 2.dp)
+            .background(if (selected) Tint else Surface, RoundedCornerShape(10.dp))
+            .border(1.dp, if (selected) CardBorderActive else Line, RoundedCornerShape(10.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 13.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            server.label,
+            modifier = Modifier.weight(1f),
+            fontSize = 11.5.sp,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+            color = Ink, fontFamily = ChakraPetch,
+            maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+        )
+        Text(server.region, fontSize = 8.5.sp, color = Ink2, fontFamily = ChakraPetch)
+        if (selected) {
+            Spacer(Modifier.width(9.dp))
+            CheckIcon(BlueStrong, Modifier.size(12.dp))
+        }
     }
 }
 

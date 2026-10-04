@@ -146,8 +146,7 @@ fun HomeScreen(
                 .offset(y = 174.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val serverName = if (settings.serverUrl.isBlank()) "Auto (nearest)"
-            else hostOf(settings.serverUrl)
+            val serverName = cloud.g3h.nimbus.net.SpeedServers.displayName(settings.serverUrl)
             Text(
                 "Measures ping, download and upload in about 30 seconds · Server: $serverName · v${cloud.g3h.nimbus.BuildConfig.VERSION_NAME}",
                 fontSize = 11.sp, color = Ink2, fontFamily = ChakraPetch
@@ -235,11 +234,6 @@ fun HomeScreen(
         }
     }
 }
-
-fun hostOf(url: String): String =
-    runCatching {
-        java.net.URI(if (url.startsWith("http")) url else "https://$url").host ?: url
-    }.getOrDefault(url)
 
 @Composable
 fun FooterStat(label: String, value: String, unit: String) {
