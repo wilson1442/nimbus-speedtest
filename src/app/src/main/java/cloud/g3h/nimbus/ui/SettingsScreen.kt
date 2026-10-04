@@ -1,5 +1,7 @@
 package cloud.g3h.nimbus.ui
 
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -208,7 +210,7 @@ private fun ServerPickerDialog(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0x8022384E))
-            .clickable(onClick = onDismiss),
+            .pointerInput(Unit) { detectTapGestures { onDismiss() } },
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -332,7 +334,7 @@ private fun TextEntryDialog(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0x8022384E))
-            .clickable(onClick = onDismiss),
+            .pointerInput(Unit) { detectTapGestures { onDismiss() } },
         contentAlignment = Alignment.Center
     ) {
         Column(

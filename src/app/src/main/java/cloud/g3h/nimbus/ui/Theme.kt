@@ -44,6 +44,12 @@ val OrbitDots = Color(0xFFA9CBEA)
 val PressOk = Color(0xFFDCEAF7)
 val SubInk = Color(0xFF45627F)
 
+// ---- Focus treatment (spec §2) ----
+// Deep enough to stand out against the pale palette: the previous BlueSoft ring
+// was too low-contrast to see on a TV at viewing distance.
+val FocusRing = Color(0xFF1E63B0)
+val FocusHalo = Color(0x4D1E63B0)
+
 val ChakraPetch = FontFamily(
     Font(R.font.chakrapetch_regular, FontWeight.Normal),
     Font(R.font.chakrapetch_medium, FontWeight.Medium),

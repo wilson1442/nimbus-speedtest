@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -18,41 +18,70 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+/** Smallest focus ring a viewer can pick out at set-top-box distance. */
+private val MinFocusRing = 3.dp
+
 /**
- * TV focus treatment (spec §2): a visible 2-ring halo — a ground gap ring
- * plus a blueSoft ring — and a slight scale-up while focused.
+ * TV focus treatment (spec §2).
  *
- * Built on the core Compose focus API (focusable + onFocusChanged), which is
- * what makes D-pad/remote input work without the tv-* libraries.
+ * Rewritten because the previous version was effectively invisible on a real
+ * set-top box. It drew the ring with `drawBehind` using **centred** strokes, so
+ * half of every ring fell outside the node and was clipped, and it mixed
+ * `BlueSoft` (#9CC2E6, pale) with a `Ground`-coloured gap ring (#F4F6F3). What
+ * survived on screen was roughly a 1 dp hairline at ~35% contrast — nothing at
+ * D-pad distance.
+ *
+ * Now it:
+ *  - draws the ring **on top** (`drawWithContent`) so no sibling background can
+ *    paint over it;
+ *  - **clamps thickness to a 3 dp floor**, so the call sites that asked for
+ *    1.5–2 dp all get something legible (6 px at 1080p, ~4 px at 720p);
+ *  - uses a **deep blue** ([FocusRing], not pale BlueSoft) plus a translucent
+ *    glow ([FocusHalo]) that contrasts with the light app palette;
+ *  - scales the focused element up.
+ *
+ * Layout is deliberately untouched: the ring sits in the padding band this
+ * modifier already reserved, and `scale` is layout-neutral — so no screen
+ * re-flows (the Home location dropdown is height-sensitive and was sized to fit).
+ *
+ * Built on the core Compose focus API (focusable + onFocusChanged), which is what
+ * makes D-pad/remote input work without the tv-* libraries.
  */
 @Composable
 fun Modifier.nimbusFocus(
     cornerRadius: Dp = 28.dp,
-    ringThickness: Dp = 4.dp,
+    ringThickness: Dp = 3.dp,
     gap: Dp = 6.dp
 ): Modifier {
     val focusedState = remember { mutableStateOf(false) }
     var focused by focusedState
+    // A floor, not an override: a call site may ask for a thicker ring, never an invisible one.
+    val stroke = maxOf(ringThickness, MinFocusRing)
     return this
         .focusable()
         .onFocusChanged { focused = it.isFocused }
-        .then(if (focused) Modifier.scale(1.03f) else Modifier)
-        .drawBehind {
-            if (!focused) return@drawBehind
-            val ring = ringThickness.toPx()
+        .then(if (focused) Modifier.scale(1.04f) else Modifier)
+        .drawWithContent {
+            drawContent()
+            if (!focused) return@drawWithContent
+            val t = stroke.toPx()
             val r = cornerRadius.toPx()
+            // Glow first — wider and translucent, so the crisp ring reads on top of it.
             drawRoundRect(
-                color = BlueSoft,
-                size = Size(size.width, size.height),
-                cornerRadius = CornerRadius(r + ring, r + ring),
-                style = Stroke(ring)
+                color = FocusHalo,
+                topLeft = Offset(-t / 2, -t / 2),
+                size = Size(size.width + t, size.height + t),
+                cornerRadius = CornerRadius(r + t / 2, r + t / 2),
+                style = Stroke(t * 2.2f)
             )
+            // The ring straddles the node edge: half lands in the reserved band,
+            // half just outside it, so it can never be clipped down to nothing.
             drawRoundRect(
-                color = Ground,
-                topLeft = Offset(ring, ring),
-                size = Size(size.width - 2 * ring, size.height - 2 * ring),
-                cornerRadius = CornerRadius(r, r),
-                style = Stroke(ring)
+                color = FocusRing,
+                topLeft = Offset(-t / 2, -t / 2),
+                size = Size(size.width + t, size.height + t),
+                cornerRadius = CornerRadius(r + t / 2, r + t / 2),
+                style = Stroke(t)
             )
         }
         .padding(gap)

@@ -23,6 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import cloud.g3h.nimbus.net.UpdateChecker
 import java.util.Locale
 
@@ -71,46 +73,55 @@ fun UpdatePrompt(vm: NimbusViewModel, modifier: Modifier = Modifier) {
                 "Download it now?"
     }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color(0x8022384E)),
-        contentAlignment = Alignment.Center
+    // A focusable Popup confines the D-pad to this modal. Before, focus could
+    // leave these buttons and land on controls hidden under the scrim, so OK
+    // acted on something the user could not see.
+    Popup(
+        alignment = Alignment.Center,
+        onDismissRequest = { vm.dismissUpdatePrompt() },
+        properties = PopupProperties(focusable = true, usePlatformDefaultWidth = false)
     ) {
-        Column(
-            modifier = Modifier
-                .width(430.dp)
-                .background(Surface, RoundedCornerShape(16.dp))
-                .border(1.dp, Line, RoundedCornerShape(16.dp))
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(9.dp)
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(Color(0x8022384E)),
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                title,
-                fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Ink, fontFamily = ChakraPetch
-            )
-            Text(
-                body,
-                fontSize = 11.sp, color = Ink2, fontFamily = ChakraPetch,
-                textAlign = TextAlign.Center
-            )
-            Spacer(Modifier.height(4.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                SecondaryButton(
-                    label = if (awaiting) "Not now" else "Later",
-                    onClick = { vm.dismissUpdatePrompt() },
-                    sizeSp = 11f
+            Column(
+                modifier = Modifier
+                    .width(430.dp)
+                    .background(Surface, RoundedCornerShape(16.dp))
+                    .border(1.dp, Line, RoundedCornerShape(16.dp))
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(9.dp)
+            ) {
+                Text(
+                    title,
+                    fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Ink, fontFamily = ChakraPetch
                 )
-                PrimaryButton(
-                    label = when {
-                        awaiting -> "Open settings"
-                        ready -> "Install now"
-                        else -> "Download"
-                    },
-                    onClick = { if (ready) vm.installUpdate() else vm.downloadUpdate() },
-                    sizeSp = 11f
+                Text(
+                    body,
+                    fontSize = 11.sp, color = Ink2, fontFamily = ChakraPetch,
+                    textAlign = TextAlign.Center
                 )
+                Spacer(Modifier.height(4.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    SecondaryButton(
+                        label = if (awaiting) "Not now" else "Later",
+                        onClick = { vm.dismissUpdatePrompt() },
+                        sizeSp = 11f
+                    )
+                    PrimaryButton(
+                        label = when {
+                            awaiting -> "Open settings"
+                            ready -> "Install now"
+                            else -> "Download"
+                        },
+                        onClick = { if (ready) vm.installUpdate() else vm.downloadUpdate() },
+                        sizeSp = 11f
+                    )
+                }
             }
         }
     }
