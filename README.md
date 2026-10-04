@@ -5,13 +5,14 @@ Speed test for Android TV and phones — **Kotlin + Jetpack Compose**, LibreSpee
 | | |
 |---|---|
 | Package | `cloud.g3h.nimbus` |
-| Current release | v1.6.0 / versionCode 11 (see `handoff/RELEASE_RECORD.md`) |
+| Current release | v1.7.0 / versionCode 12 (see `handoff/RELEASE_RECORD.md`) |
 | minSdk / targetSdk | 24 / 35 |
 | Leanback / touchscreen | both optional (one APK for TV + phones) |
 | Engine | LibreSpeed protocol: `empty.php` ping/upload · `garbage.php` download |
 | Default server | `https://nyc.speedtest.clouvider.net/backend` — selectable from a **location dropdown on the Home screen** (or the Settings picker), from 12 verified public backends; any custom URL accepted |
 | Persistence | Room (test history) + DataStore (settings) |
 | UI | Compose 1.7.6, material3, D-pad focus, bundled Chakra Petch + Oxanium fonts |
+| Icon | Nimbus cloud/speedometer logo: adaptive icon (API 26+), legacy icons (API 24/25), 320×180 leanback banner |
 
 ## Layout
 
@@ -24,7 +25,7 @@ src/                      Gradle project root (./gradlew here)
       net/                SettingsStore (DataStore), ConnectionMonitor, UpdateChecker, SpeedServers
       ui/                 Compose screens (Home/Test/Results/History/Settings) + UpdateBanner
     src/test/             PingMathTest (10), QualityScoreTest (6), ServerProbeTest (2),
-                          UpdateCheckerTest (8), SpeedServersTest (6),
+                          UpdateCheckerTest (8), SpeedServersTest (8), InstallResumeTest (4),
                           LiveEmissionTest (live server, self-skips offline)
 design/                   HTML mockups the UI was built from
 handoff/                  RELEASE_RECORD.md (per-version verification evidence)
@@ -70,6 +71,7 @@ Installed apps update themselves from **GitHub Releases** — this repo's releas
 - `release.sh` attaches the signed APK to the tag's GitHub Release (asset name `nimbus-speedtest-<version>-v<code>-signed.apk`) and writes a machine-readable `nimbus-versionCode=<code>` line into the release notes.
 - **Automatic check, explicit consent.** On **every app open** the app checks the public GitHub API (`GET /repos/wilson1442/nimbus-speedtest/releases/latest`) and compares `versionCode` against its own. When a newer build exists it **prompts**: *"Update available — vX (Y MB). Download it now?"* → Download / Later, then *"Update ready to install"* → Install now / Later. Nothing is downloaded or installed without the user accepting; BACK dismisses the prompt for that session. (A 60 s floor between checks only stops a crash/restart loop from hammering the API — it is not a periodic throttle.)
 - Download progress shows as a banner pill on every screen; the **Settings → App update** row still offers a manual *Check* / *Download* / *Install*, and the **Auto-update** toggle (default On) can disable the launch check entirely.
+- **Android's "install unknown apps" grant is handled without a restart.** If the toggle is off, the prompt switches to *"One more step"* and opens the setting; on returning, `MainActivity.onResume()` → `NimbusViewModel.onAppResumed()` fires the install immediately. (It used to stall there until the app was force-closed.)
 - The APK is verified (zip + `AndroidManifest.xml`) before promotion and handed over via a `FileProvider` URI. Android 8+ requires allowing Nimbus to install unknown apps once (`REQUEST_INSTALL_PACKAGES`); the app detects this and opens the right Settings toggle instead of failing silently.
 - **Settings → About** shows the running version and build number; the version also appears on the Home screen under the START button.
 - No backend, no server, no Play Store.
@@ -81,11 +83,12 @@ To push an update to devices: ship a new tag via the pipeline above. Devices on 
 - `PingMathTest` — 10 unit tests (median ping, jitter, loss math).
 - `QualityScoreTest` — 6 unit tests (0–100 quality score + grade bands, bounds, missing-ping neutrality).
 - `ServerProbeTest` — 2 tests (probe reports a reason when unreachable; latency when reachable).
-- `UpdateCheckerTest` — 8 tests (release-JSON parsing + the 6 h auto-check throttle gate).
-- `SpeedServersTest` — 6 tests (catalogue is https/no-trailing-slash, unique labels+urls, all regions present, default selectable, `forUrl`/`displayName` behaviour).
+- `UpdateCheckerTest` — 8 tests (release-JSON parsing + the 60 s launch-check floor that stops a restart loop).
+- `SpeedServersTest` — 8 tests (catalogue is https/no-trailing-slash, unique labels+urls, all regions present, default selectable, `forUrl`/`displayName` behaviour).
+- `InstallResumeTest` — 4 tests (an update completes on returning from the "install unknown apps" toggle, stays pending if the grant is still missing, and a plain resume never installs).
 - `LiveEmissionTest` — runs the real engine against the default server and asserts the engine emits live progress *during* download and upload (regression guard for the realtime display). Self-skips via `assumeTrue` when the server is unreachable, so CI stays green offline.
 
-Full suite: **33/33**.
+Full suite: **39/39**.
 
 ## Speed-test servers
 
