@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The logo plate colour sampled from the source art (#FCFDFC). -->
+    <color name="ic_launcher_background">#FCFDFC</color>
+</resources>

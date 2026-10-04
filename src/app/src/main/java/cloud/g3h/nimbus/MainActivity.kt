@@ -28,6 +28,20 @@ import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
 
+    /** Captured from the composition so onResume() can finish a paused install. */
+    private var activeVm: NimbusViewModel? = null
+
+    /**
+     * The "install unknown apps" grant happens in a system Settings screen, so the
+     * app is paused while the user toggles it. On the way back this hands control
+     * to the view model, which installs immediately if the grant is now on — the
+     * reason a force-close is no longer needed to apply an update.
+     */
+    override fun onResume() {
+        super.onResume()
+        activeVm?.onAppResumed()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -37,6 +51,7 @@ class MainActivity : ComponentActivity() {
                 val vm = androidx.lifecycle.viewmodel.compose.viewModel {
                     NimbusViewModel(app)
                 }
+                activeVm = vm
                 val screen by vm.screen.collectAsState()
                 // TV-style BACK: walk the in-app hierarchy (sub-screen -> Home,
                 // running test -> cancel, dialog -> dismiss). On the Home

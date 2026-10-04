@@ -70,7 +70,9 @@ data class SettingsUiState(
     val updateError: String? = null,
     val downloadPct: Int = -1,
     /** True while the "update available / ready" prompt should be on screen. */
-    val updatePromptVisible: Boolean = false
+    val updatePromptVisible: Boolean = false,
+    /** True once we've sent the user to grant "install unknown apps" and still owe them the install. */
+    val updateAwaitingPermission: Boolean = false
 )
 
 /** Server reachability probe result (Settings → Test connection). */
@@ -465,7 +467,10 @@ class NimbusViewModel(private val app: NimbusApp) : ViewModel() {
     }
 
     /** "Later" — hide the prompt for this session; the next launch asks again. */
-    fun dismissUpdatePrompt() = settings.update { it.copy(updatePromptVisible = false) }
+    fun dismissUpdatePrompt() {
+        installAwaitingPermission = false
+        settings.update { it.copy(updatePromptVisible = false, updateAwaitingPermission = false) }
+    }
 
     /** Auto-update preference; re-enabling allows an immediate check. */
     fun setAutoUpdate(v: Boolean) {
@@ -480,55 +485,113 @@ class NimbusViewModel(private val app: NimbusApp) : ViewModel() {
         }
     }
 
+    /**
+     * True once we've sent the user to grant "install unknown apps" and still owe
+     * them the install. This is the piece that makes "grant permission -> it just
+     * installs" work: the old code returned after opening Settings and nothing ever
+     * retried, so the update only landed after a force-close restarted the app.
+     */
+    @Volatile private var installAwaitingPermission = false
+
     /** Hands the cached APK to the system installer (FileProvider URI). */
     fun installUpdate() {
-        settings.update { it.copy(updatePromptVisible = false) }
         val info = settings.value.updateInfo ?: return
-        val file = UpdateChecker.cachedApk(app.applicationContext, info) ?: return
         val ctx = app.applicationContext
 
-        // Android 8+: the installer refuses APKs from an app that isn't allowed
-        // to install unknown apps. Send the user straight to that toggle instead
-        // of failing silently.
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O &&
-            !ctx.packageManager.canRequestPackageInstalls()
-        ) {
-            runCatching {
-                ctx.startActivity(
-                    android.content.Intent(
-                        android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                        android.net.Uri.parse("package:${ctx.packageName}")
-                    ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                )
-            }
+        if (needsInstallPermission(ctx)) {
+            // Android 8+ refuses APKs from an app that isn't allowed to install
+            // unknown apps. Send them to that toggle, keep the prompt up, and
+            // finish automatically in onAppResumed() when they come back.
+            installAwaitingPermission = true
+            settings.update { it.copy(updatePromptVisible = true, updateAwaitingPermission = true) }
+            openInstallPermissionSettings(ctx)
             return
         }
 
+        installAwaitingPermission = false
+        settings.update { it.copy(updatePromptVisible = false, updateAwaitingPermission = false) }
+        launchInstaller(ctx, info)
+    }
+
+    /**
+     * Called from the activity's onResume. If we were waiting on the
+     * "install unknown apps" grant and it's now on, install straight away — no
+     * force-close, no second tap.
+     */
+    fun onAppResumed() {
+        val ctx = app.applicationContext
+        if (!shouldCompleteInstall(installAwaitingPermission, needsInstallPermission(ctx))) return
+        installAwaitingPermission = false
+        val info = settings.value.updateInfo ?: return
+        settings.update { it.copy(updatePromptVisible = false, updateAwaitingPermission = false) }
+        launchInstaller(ctx, info)
+    }
+
+    private fun needsInstallPermission(ctx: android.content.Context): Boolean =
+        android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O &&
+            !ctx.packageManager.canRequestPackageInstalls()
+
+    private fun openInstallPermissionSettings(ctx: android.content.Context) {
+        runCatching {
+            ctx.startActivity(
+                android.content.Intent(
+                    android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    android.net.Uri.parse("package:${ctx.packageName}")
+                ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            )
+        }
+    }
+
+    private fun launchInstaller(ctx: android.content.Context, info: UpdateChecker.UpdateInfo) {
+        val file = UpdateChecker.cachedApk(ctx, info) ?: return
         val uri = androidx.core.content.FileProvider.getUriForFile(
-            ctx,
-            "${ctx.packageName}.fileprovider",
-            file
+            ctx, "${ctx.packageName}.fileprovider", file
         )
-        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
-            .setDataAndType(uri, "application/vnd.android.package-archive")
-            .addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-        try {
-            ctx.startActivity(intent)
-        } catch (e: Exception) {
-            // No chooser on some TV boxes — fall back to the release page in a browser.
-            runCatching {
-                ctx.startActivity(
-                    android.content.Intent(
-                        android.content.Intent.ACTION_VIEW,
-                        android.net.Uri.parse("https://github.com/wilson1442/nimbus-speedtest/releases")
-                    ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-                )
+        // Boxes differ: some only answer ACTION_VIEW, some only INSTALL_PACKAGE.
+        val candidates = listOf(
+            android.content.Intent(android.content.Intent.ACTION_VIEW)
+                .setDataAndType(uri, "application/vnd.android.package-archive"),
+            android.content.Intent("android.intent.action.INSTALL_PACKAGE").setData(uri)
+        )
+        for (intent in candidates) {
+            intent.addFlags(
+                android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                    android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+            )
+            try {
+                ctx.startActivity(intent)
+                return
+            } catch (_: Exception) {
+                // try the next shape
             }
+        }
+        // Nothing on this device can install it — send them to the release page.
+        runCatching {
+            ctx.startActivity(
+                android.content.Intent(
+                    android.content.Intent.ACTION_VIEW,
+                    android.net.Uri.parse("https://github.com/wilson1442/nimbus-speedtest/releases")
+                ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            )
         }
     }
 
     override fun onCleared() {
         super.onCleared()
         testJob?.cancel()
+    }
+
+    companion object {
+        /**
+         * Whether coming back to the app should finish a paused install: only when we
+         * sent the user off to grant "install unknown apps" AND the grant is now on.
+         * If they haven't granted yet the prompt stays up, so tapping Install again
+         * (or "Open settings") works; with nothing pending it stays a no-op.
+         *
+         * Pure, so the rule that fixes the "had to force-close to update" bug is
+         * unit-tested rather than only exercised on a device.
+         */
+        fun shouldCompleteInstall(awaitingPermission: Boolean, stillNeedsPermission: Boolean): Boolean =
+            awaitingPermission && !stillNeedsPermission
     }
 }

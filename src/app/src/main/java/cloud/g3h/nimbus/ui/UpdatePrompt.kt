@@ -32,6 +32,12 @@ import java.util.Locale
  * The launch check only *detects* a release — the APK is never fetched or
  * installed without the user accepting here. Rendered at the composition root
  * so it appears on whatever screen is showing when the check completes.
+ *
+ * Three states, mirroring the view model: AVAILABLE ("Download it now?"), READY
+ * ("Install it now?") and READY + awaiting permission, where Android's
+ * unknown-sources grant is the only thing missing. That last one used to stall
+ * until the app was force-closed; now `NimbusViewModel.onAppResumed()` finishes
+ * the install as soon as the user returns from the settings toggle.
  */
 @Composable
 fun UpdatePrompt(vm: NimbusViewModel, modifier: Modifier = Modifier) {
@@ -40,9 +46,30 @@ fun UpdatePrompt(vm: NimbusViewModel, modifier: Modifier = Modifier) {
 
     val ready = settings.updateStatus == UpdateChecker.Status.READY
     if (!ready && settings.updateStatus != UpdateChecker.Status.AVAILABLE) return
+    val awaiting = settings.updateAwaitingPermission
 
     val version = settings.updateInfo?.tagName?.trimStart('v') ?: "?"
     val sizeMb = (settings.updateInfo?.assetSize ?: 0L) / 1_048_576.0
+
+    val title = when {
+        awaiting -> "One more step"
+        ready -> "Update ready to install"
+        else -> "Update available"
+    }
+    val body = when {
+        // Android's unknown-sources grant is the only thing missing. The install
+        // resumes on its own in NimbusViewModel.onAppResumed() when the user comes
+        // back — the old code stalled here until the app was force-closed.
+        awaiting ->
+            "Android needs your permission to install the update. Turn on " +
+                "\"Allow from this source\" for Nimbus, then come back here — the " +
+                "update installs on its own, no restart needed."
+        ready ->
+            "Nimbus v$version has been downloaded. Install it now? The app will restart."
+        else ->
+            "Nimbus v$version is available (${String.format(Locale.getDefault(), "%.1f", sizeMb)} MB). " +
+                "Download it now?"
+    }
 
     Box(
         modifier = modifier
@@ -60,20 +87,27 @@ fun UpdatePrompt(vm: NimbusViewModel, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(9.dp)
         ) {
             Text(
-                if (ready) "Update ready to install" else "Update available",
+                title,
                 fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Ink, fontFamily = ChakraPetch
             )
             Text(
-                if (ready) "Nimbus v$version has been downloaded. Install it now? The app will restart."
-                else "Nimbus v$version is available (${String.format(Locale.getDefault(), "%.1f", sizeMb)} MB). Download it now?",
+                body,
                 fontSize = 11.sp, color = Ink2, fontFamily = ChakraPetch,
                 textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(4.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                SecondaryButton("Later", onClick = { vm.dismissUpdatePrompt() }, sizeSp = 11f)
+                SecondaryButton(
+                    label = if (awaiting) "Not now" else "Later",
+                    onClick = { vm.dismissUpdatePrompt() },
+                    sizeSp = 11f
+                )
                 PrimaryButton(
-                    label = if (ready) "Install now" else "Download",
+                    label = when {
+                        awaiting -> "Open settings"
+                        ready -> "Install now"
+                        else -> "Download"
+                    },
                     onClick = { if (ready) vm.installUpdate() else vm.downloadUpdate() },
                     sizeSp = 11f
                 )
