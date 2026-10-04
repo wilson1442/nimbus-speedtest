@@ -4,16 +4,16 @@
 |---|---|
 | App name | Nimbus Speed Test |
 | Package ID | cloud.g3h.nimbus |
-| versionName | **1.2.1** (current) — 1.2.0, 1.1.1, 1.1.0, 1.0.2, 1.0.1, 1.0.0 (superseded) |
-| versionCode | **7** (current) — 6, 5, 4, 3, 2, 1 (builder `GET /api/v1/builds` history hangs server-side, noted gap per standard §22.3) |
+| versionName | **1.3.0** (current) — 1.2.1, 1.2.0, 1.1.1, 1.1.0, 1.0.2, 1.0.1, 1.0.0 (superseded) |
+| versionCode | **8** (current) — 7, 6, 5, 4, 3, 2, 1 (builder `GET /api/v1/builds` history hangs server-side, noted gap per standard §22.3) |
 | Build format | apk (zipaligned, apksigner v2+v3) |
 | Keystore | id=7, name "nimbus", alias `nimbus-key` (created 2026-10-03 14:03) |
-| Builder buildId | **1ecfd3b9-dd70-4ff4-aa24-bd2a8db8eff3** (current) · 007f6686-bb0f-4be4-a80c-ad7e4a0ac5c9 (v1.2.0) · e3627e29-055f-4903-84ec-cc7fcd9b8c37 (v1.1.1) · 76c8d384-24a0-4dbd-b7a4-b5b96874f4f2 (v1.1.0) · 8bc85e33-328b-4fea-af65-af2b43aeee56 (v1.0.2) · 0e5c4e26-43bd-452b-b724-36b3107a490b (v1.0.1) · da74e82f-24f7-44ee-a05a-56ee49999d47 (v1.0.0) |
+| Builder buildId | **2472f5e5-bc82-4ec0-9324-693d1721ed3c** (current) · 1ecfd3b9-dd70-4ff4-aa24-bd2a8db8eff3 (v1.2.1) · 007f6686-bb0f-4be4-a80c-ad7e4a0ac5c9 (v1.2.0) · e3627e29-055f-4903-84ec-cc7fcd9b8c37 (v1.1.1) · 76c8d384-24a0-4dbd-b7a4-b5b96874f4f2 (v1.1.0) · 8bc85e33-328b-4fea-af65-af2b43aeee56 (v1.0.2) · 0e5c4e26-43bd-452b-b724-36b3107a490b (v1.0.1) · da74e82f-24f7-44ee-a05a-56ee49999d47 (v1.0.0) |
 | App type | id=9 "Nimbus Speed Test" (created 2026-10-03 via skill-key `POST /api/v1/app-types`, defaultPackage cloud.g3h.nimbus, no template — archive-driven; note: `appName` form field is REQUIRED on `POST /api/v1/builds` or the API returns 400) |
-| Source | git repo `wilson1442/nimbus-speedtest` @ tag `v1.2.1` (commit `883f4488028f`) — previous releases: `v1.2.0` (`dbb548a71f0b`), `v1.1.1` (`9bd8b3168b23`), `v1.1.0` (`b74cd544ce66`), `v1.0.2` (`233b711b9e6e`), v1.0.1/v1.0.0 (archive). NOTE: commits for v1.0.2–v1.2.0 were previously recorded as the *tag object* SHAs (release.sh read the wrong `ls-remote` row); corrected 2026-10-03 against `git rev-parse <tag>^{commit}`. |
+| Source | git repo `wilson1442/nimbus-speedtest` @ tag `v1.3.0` (commit `5f08c336975f`) — previous releases: `v1.2.1` (`883f4488028f`), `v1.2.0` (`dbb548a71f0b`), `v1.1.1` (`9bd8b3168b23`), `v1.1.0` (`b74cd544ce66`), `v1.0.2` (`233b711b9e6e`), v1.0.1/v1.0.0 (archive). (Commits for v1.0.2–v1.2.0 were corrected from tag-object SHAs in the v1.2.1 round.) |
 | Build status | completed |
-| Built at | 2026-10-03 (builder local time, via `./release.sh v1.2.1 7`) |
-| APK SHA-256 | **7c1508620bdd4199a25e4601ef8bc9e48f9dbce749163443b5aa2681cb4e43fc** (current) · bda6b95ebb43fc0212fb6ad03d3248b33807b77527a6964d09e8fdc59f1ecc5b (v1.2.0) · 2a3d376b39518fd49b130349f2cefba24496ca3d4ac1a711275fb1c5c5f9db5a (v1.1.1) · 25e88002f45da675f0b83820f25145cd13759572949c83b43aa20b6ffa4862b6 (v1.1.0) · e91c7b73fbf2e61360b47dc98e3743d285f805d1d070c8a3de909ac317996060 (v1.0.2) · bf7523399ee0edf18ffaf408b71f24a2904c5fb8d0359837f9a407085b60508a (v1.0.1) · b575d33c11d53e3415e79a4914dea2e4ee19bf6c872d4d3c8d95fb993c7089d7 (v1.0.0) |
+| Built at | 2026-10-03 (builder local time, via `./release.sh v1.3.0 8`) |
+| APK SHA-256 | **a3b462c8c4efba67d497811557bdb002393c67073340df5de3a47f91a8c21f59** (current) · 7c1508620bdd4199a25e4601ef8bc9e48f9dbce749163443b5aa2681cb4e43fc (v1.2.1) · bda6b95ebb43fc0212fb6ad03d3248b33807b77527a6964d09e8fdc59f1ecc5b (v1.2.0) · 2a3d376b39518fd49b130349f2cefba24496ca3d4ac1a711275fb1c5c5f9db5a (v1.1.1) · 25e88002f45da675f0b83820f25145cd13759572949c83b43aa20b6ffa4862b6 (v1.1.0) · e91c7b73fbf2e61360b47dc98e3743d285f805d1d070c8a3de909ac317996060 (v1.0.2) · bf7523399ee0edf18ffaf408b71f24a2904c5fb8d0359837f9a407085b60508a (v1.0.1) · b575d33c11d53e3415e79a4914dea2e4ee19bf6c872d4d3c8d95fb993c7089d7 (v1.0.0) |
 | APK size | 8,183,128 bytes |
 | Cert DN | CN=Nimbus Speed Test, O=Nimbus Speed Test, L=Unknown, ST=Unknown, C=US |
 | Cert SHA-256 | 1940e036fd139e4562882628ba98d6ab1247998490ba251cf71da41257865f72 (identical across all builds — upgrade-compatible) |
@@ -23,14 +23,34 @@
 | Label | Nimbus Speed Test |
 | Launcher activity | cloud.g3h.nimbus.MainActivity (LAUNCHER + LEANBACK_LAUNCHER) |
 | Features | android.software.leanback required=false; android.hardware.touchscreen required=false |
-| Permissions | INTERNET, ACCESS_NETWORK_STATE, ACCESS_WIFI_STATE (+ auto DYNAMIC_RECEIVER_NOT_EXPORTED) |
+| Permissions | INTERNET, ACCESS_NETWORK_STATE, ACCESS_WIFI_STATE, **REQUEST_INSTALL_PACKAGES** (auto-update installer, added v1.3.0) (+ auto DYNAMIC_RECEIVER_NOT_EXPORTED) |
 | Default speed-test server | **baked in 1.0.1**: `https://nyc.speedtest.clouvider.net/backend` (public LibreSpeed backend, verified 2026-10-03: empty.php ping 200 @121ms, garbage.php streams full line rate, empty.php POST 200). User can override in Settings (DataStore wins over BuildConfig). |
 | Placeholder scan | 0 unreplaced tokens in DEX |
 | Fonts bundled | chakrapetch regular/medium/semibold/bold + oxanium medium/semibold/bold (confirmed in resources.arsc) |
 | App code | MainActivity, LibreSpeedEngine, HomeScreen present in classes2.dex |
-| Local gate | assembleDebug EXIT=0; unit tests pass (23/23: 10 PingMath + 2 ServerProbe + 1 LiveEmission + 4 UpdateChecker + 6 QualityScore) |
-| Publication | **GitHub Release `v1.2.1`** (https://github.com/wilson1442/nimbus-speedtest/releases/tag/v1.2.1) — signed APK attached as asset `nimbus-speedtest-1.2.1-v7-signed.apk`; served bytes verified byte-identical to `handoff/`; DEX probe confirms the 7 removed symbols are absent and QualityScore/LibreSpeedEngine/Room `_Impl`s present. (In-script publish hit the recurring GitHub-API 500 across all 3 retries and correctly FAILED LOUD; release created manually via `gh` and verified. Builder's publish route unused, §23.) |
+| Local gate | assembleDebug EXIT=0; unit tests pass (27/27: 10 PingMath + 2 ServerProbe + 1 LiveEmission + 8 UpdateChecker + 6 QualityScore) |
+| Publication | **GitHub Release `v1.3.0`** (https://github.com/wilson1442/nimbus-speedtest/releases/tag/v1.3.0) — signed APK attached as asset `nimbus-speedtest-1.3.0-v8-signed.apk`; published by `release.sh` itself this run (no API 500), served bytes verified byte-identical to `handoff/`; DEX probe confirms UpdateBanner/isCheckDue/canRequestPackageInstalls/autoCheckForUpdates present. Builder's publish route unused, §23. |
 | Source repo | `https://github.com/wilson1442/nimbus-speedtest` (public, `main`) — local path `F:\hermes-work\coder\nimbus-speedtest`; release keystore is NOT in the repo (apk-builder holds it) |
+
+## v1.3.0 change (2026-10-03) — automatic updates + visible version number
+
+**Auto-update (previously: manual "Check" only, buried in Settings).** A release now reaches the TV unattended — check → download → hand to the system installer:
+
+- **On launch** the ViewModel runs `autoCheckForUpdates()`: it skips when the user disabled auto-update, and otherwise honours a persisted throttle (`SettingsStore.lastUpdateCheck` + `UpdateChecker.isCheckDue`, 6 h) so the GitHub API budget (60 reads/hour/IP) is respected.
+- When the feed's `versionCode` is strictly greater it downloads the APK and, on completion, launches the installer itself (`downloadUpdate(auto = true)` → `viewModelScope.launch { installUpdate() }`). This is as automatic as Android allows for a sideloaded app: the user only confirms in the system installer dialog.
+- **`UpdateBanner`** (new, rendered at the composition root in `MainActivity`) shows "update available → downloading N% → ready · Install now" **on every screen**, not just Settings. The Install button is the fallback when the automatic installer launch is blocked (e.g. app backgrounded).
+- **New Settings row: Auto-update On/Off** (default On), persisted in DataStore. Turning it back on resets the last-check stamp and triggers an immediate check.
+- **Android 8+ install permission:** `installUpdate()` now checks `packageManager.canRequestPackageInstalls()` and, when false, sends the user straight to the *install unknown apps* toggle for this app (`ACTION_MANAGE_UNKNOWN_APP_SOURCES`) instead of silently doing nothing. The manifest declares `REQUEST_INSTALL_PACKAGES`. **On a device where Nimbus was side-loaded, the first automatic update will land on that Settings toggle — allow it once and subsequent updates proceed.**
+- `UpdateChecker.isCheckDue(last, now, interval)` extracted as a pure function with 4 new unit tests (never-checked is due; inside the interval is not; past it is; default interval is 6 h).
+
+**Version number now visible:**
+- Home subtitle: `… · Server: <host> · v<versionName>`.
+- Settings → About: `v<versionName> (build <versionCode>)`.
+- `SettingsUiState.versionName` now defaults to `BuildConfig.VERSION_NAME`, so it is correct on the first frame (no brief "1.0.0").
+
+**Caveat:** automatic update only begins with *this* build. An installed v1.2.1-or-earlier still needs one manual Settings → Check (or a re-sideload) to get onto v1.3.0; from v1.3.0 onward updates are unattended.
+
+**Tests:** 27/27 (was 23; +4 throttle). Release published by `release.sh` itself this run (no GitHub 500); the tag→commit fix from v1.2.1 is confirmed in the real log line (`commit=5f08c336975f` = the peeled commit).
 
 ## v1.2.1 change (2026-10-03) — codebase review: performance/correctness fixes + dead-code removal
 
@@ -108,21 +128,21 @@ No user-visible feature change. Findings from a whole-codebase review, each veri
 - Baked in a public LibreSpeed-compatible default speed-test server (NYC, Clouvider) so the app runs out-of-the-box; the in-app Settings server field still overrides it at runtime. Source: official LibreSpeed backend-server list (`https://librespeed.org/backend-servers/servers.php`, 22 servers probed; NYC chosen — lowest US latency 121 ms, all three engine endpoints verified).
 - versionCode 1 → 2, versionName 1.0.0 → 1.0.1.
 
-## Verification evidence (current v1.2.1)
+## Verification evidence (current v1.3.0)
 
-- `v7-badging.txt` — aapt dump badging (versionCode 7 / 1.2.1, minSdk 24 / target 35, leanback+touchscreen not-required)
-- `v7-apksigner.txt` — apksigner verify --verbose --print-certs (v2+v3 true, cert 1940e036…f72)
-- `v7-sha256.txt` — sha256sum (7c150862…4e43fc)
-- Update-feed check: unauthenticated `GET /releases/latest` returns tag v1.2.1, body tail `nimbus-versionCode=7`, asset `nimbus-speedtest-1.2.1-v7-signed.apk` (8,183,128 bytes); served download **byte-identical** to `handoff/`
-- DEX class probe: the 7 removed symbols are absent (only the surviving `drawDashedLineY` matches the `DashedLine` substring); `QualityScore`, `QualityHero`, `LatencyCard`, `LibreSpeedEngine`, `ConnectionMonitor`, `TestResultDao_Impl`, `NimbusDatabase_Impl` all present
-- `release-121.log` — full `./release.sh v1.2.1 7` transcript (builder build 1ecfd3b9; publish section shows the recurring failed-loud GitHub 500)
-- `build-optimize.log` / `build-optimize2.log` — local `assembleDebug testDebugUnitTest` (23/23 green)
-- (superseded) `v6-*.txt` (v1.2.0), `v5-*.txt` (v1.1.1), `v4-*.txt` (v1.1.0), `v3-*.txt` (v1.0.2), `v2-*.txt` (v1.0.1), `signed-*.txt` (v1.0.0)
+- `v8-badging.txt` — aapt dump badging (versionCode 8 / 1.3.0, minSdk 24 / target 35, `uses-permission REQUEST_INSTALL_PACKAGES` present, leanback+touchscreen not-required)
+- `v8-apksigner.txt` — apksigner verify --verbose --print-certs (v2+v3 true, cert 1940e036…f72)
+- `v8-sha256.txt` — sha256sum (a3b462c8…21f59)
+- Update-feed check: unauthenticated `GET /releases/latest` returns tag v1.3.0, body tail `nimbus-versionCode=8`, asset `nimbus-speedtest-1.3.0-v8-signed.apk` (8,183,128 bytes); served download **byte-identical** to `handoff/`
+- DEX class probe: `UpdateBanner`, `isCheckDue`, `canRequestPackageInstalls`, `autoCheckForUpdates`, `auto_update` and `android.settings.MANAGE_UNKNOWN_APP_SOURCES` all present in the signed v8 APK
+- `release-130.log` — full `./release.sh v1.3.0 8` transcript (builder build 2472f5e5; **published by the script, no API 500**; logs the peeled commit `5f08c336975f`)
+- `build-autoupdate2.log` — local `assembleDebug testDebugUnitTest` (27/27 green)
+- (superseded) `v7-*.txt` (v1.2.1), `v6-*.txt` (v1.2.0), `v5-*.txt` (v1.1.1), `v4-*.txt` (v1.1.0), `v3-*.txt` (v1.0.2), `v2-*.txt` (v1.0.1), `signed-*.txt` (v1.0.0)
 
 ## Artifacts
 
-- **`nimbus-speedtest-1.2.1-v7-signed.apk`** — current production-signed release (keystore id=7; codebase-review build: off-main-thread engine I/O, no thread leak, remembered focus requesters, dead code removed; carries all of v1.2.0's latency/quality-score work). Also attached to GitHub Release `v1.2.1` (verified byte-identical).
-- `nimbus-speedtest-1.2.0-v6-signed.apk` — previous release (latency first-class + quality score), superseded.
+- **`nimbus-speedtest-1.3.0-v8-signed.apk`** — current production-signed release (keystore id=7; automatic updates + visible version; carries all prior work: latency/quality-score, codebase-review fixes). Also attached to GitHub Release `v1.3.0` (verified byte-identical).
+- `nimbus-speedtest-1.2.1-v7-signed.apk` — previous release (codebase-review build), superseded.
 - `nimbus-speedtest-1.0.2-v3-signed.apk` — previous release (realtime bandwidth), superseded.
 - `nimbus-speedtest-1.0.1-v2-signed.apk` — superseded.
 - `nimbus-speedtest-1.0.0-v1-signed.apk` — superseded.
