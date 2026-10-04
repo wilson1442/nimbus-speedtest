@@ -5,11 +5,11 @@ Speed test for Android TV and phones — **Kotlin + Jetpack Compose**, LibreSpee
 | | |
 |---|---|
 | Package | `cloud.g3h.nimbus` |
-| Current release | v1.3.0 / versionCode 8 (see `handoff/RELEASE_RECORD.md`) |
+| Current release | v1.4.0 / versionCode 9 (see `handoff/RELEASE_RECORD.md`) |
 | minSdk / targetSdk | 24 / 35 |
 | Leanback / touchscreen | both optional (one APK for TV + phones) |
 | Engine | LibreSpeed protocol: `empty.php` ping/upload · `garbage.php` download |
-| Default server | `https://nyc.speedtest.clouvider.net/backend` (public LibreSpeed backend; changeable at runtime in Settings) |
+| Default server | `https://nyc.speedtest.clouvider.net/backend` — plus a picker of 12 verified public backends (US East/Central/West, Europe, Asia) in Settings; any custom URL accepted |
 | Persistence | Room (test history) + DataStore (settings) |
 | UI | Compose 1.7.6, material3, D-pad focus, bundled Chakra Petch + Oxanium fonts |
 
@@ -21,10 +21,11 @@ src/                      Gradle project root (./gradlew here)
     src/main/java/cloud/g3h/nimbus/
       engine/             LibreSpeedEngine (realtime emissions), PingMath, SpeedTestEngine
       data/               Room entities/DAO/database
-      net/                SettingsStore (DataStore), ConnectionMonitor, UpdateChecker
+      net/                SettingsStore (DataStore), ConnectionMonitor, UpdateChecker, SpeedServers
       ui/                 Compose screens (Home/Test/Results/History/Settings) + UpdateBanner
     src/test/             PingMathTest (10), QualityScoreTest (6), ServerProbeTest (2),
-                          UpdateCheckerTest (8), LiveEmissionTest (live server, self-skips offline)
+                          UpdateCheckerTest (8), SpeedServersTest (6),
+                          LiveEmissionTest (live server, self-skips offline)
 design/                   HTML mockups the UI was built from
 handoff/                  RELEASE_RECORD.md (per-version verification evidence)
 HERMES_BUILD_SPEC.md      original build spec
@@ -81,6 +82,21 @@ To push an update to devices: ship a new tag via the pipeline above. Devices on 
 - `QualityScoreTest` — 6 unit tests (0–100 quality score + grade bands, bounds, missing-ping neutrality).
 - `ServerProbeTest` — 2 tests (probe reports a reason when unreachable; latency when reachable).
 - `UpdateCheckerTest` — 8 tests (release-JSON parsing + the 6 h auto-check throttle gate).
+- `SpeedServersTest` — 6 tests (catalogue is https/no-trailing-slash, unique labels+urls, all regions present, default selectable, `forUrl`/`displayName` behaviour).
 - `LiveEmissionTest` — runs the real engine against the default server and asserts the engine emits live progress *during* download and upload (regression guard for the realtime display). Self-skips via `assumeTrue` when the server is unreachable, so CI stays green offline.
 
-Full suite: **27/27**.
+Full suite: **33/33**.
+
+## Speed-test servers
+
+Settings → **Speed test server → Choose** lists 12 public LibreSpeed-compatible backends, grouped by region:
+
+| Region | Servers |
+|---|---|
+| US · East | New York, Atlanta |
+| US · Central | Chicago, Denver, Grand Rapids |
+| US · West | Los Angeles (Clouvider), Las Vegas |
+| Europe | London, Amsterdam, Frankfurt, Prague |
+| Asia | Tokyo |
+
+Every entry was probed against the engine's real contract before being listed (`GET empty.php` 200; `GET garbage.php?ckSize=1` 200 with a complete 1,048,576-byte body; `POST empty.php` 200). Picking one selects it *and* probes it immediately; **Custom URL…** still allows any endpoint. There is **no public Canadian LibreSpeed backend** — the official list has none, so the nearest US server is the substitute.
