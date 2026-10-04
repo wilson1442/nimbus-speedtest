@@ -5,7 +5,7 @@ Speed test for Android TV and phones — **Kotlin + Jetpack Compose**, LibreSpee
 | | |
 |---|---|
 | Package | `cloud.g3h.nimbus` |
-| Current release | v1.7.2 / versionCode 14 (see `handoff/RELEASE_RECORD.md`) |
+| Current release | v1.7.3 / versionCode 15 (see `handoff/RELEASE_RECORD.md`) |
 | minSdk / targetSdk | 24 / 35 |
 | Leanback / touchscreen | both optional (one APK for TV + phones) |
 | Engine | LibreSpeed protocol: `empty.php` ping/upload · `garbage.php` download |
