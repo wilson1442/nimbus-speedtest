@@ -5,7 +5,7 @@ Speed test for Android TV and phones — **Kotlin + Jetpack Compose**, LibreSpee
 | | |
 |---|---|
 | Package | `cloud.g3h.nimbus` |
-| Current release | v1.7.0 / versionCode 12 (see `handoff/RELEASE_RECORD.md`) |
+| Current release | v1.7.1 / versionCode 13 (see `handoff/RELEASE_RECORD.md`) |
 | minSdk / targetSdk | 24 / 35 |
 | Leanback / touchscreen | both optional (one APK for TV + phones) |
 | Engine | LibreSpeed protocol: `empty.php` ping/upload · `garbage.php` download |
@@ -13,6 +13,7 @@ Speed test for Android TV and phones — **Kotlin + Jetpack Compose**, LibreSpee
 | Persistence | Room (test history) + DataStore (settings) |
 | UI | Compose 1.7.6, material3, D-pad focus, bundled Chakra Petch + Oxanium fonts |
 | Icon | Nimbus cloud/speedometer logo: adaptive icon (API 26+), legacy icons (API 24/25), 320×180 leanback banner |
+| In-app logo | `drawable-xxxhdpi/nimbus_logo.png` in the dashboard top bar and every screen header (42 dp) |
 
 ## Layout
 
