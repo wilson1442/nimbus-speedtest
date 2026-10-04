@@ -17,10 +17,13 @@ import cloud.g3h.nimbus.ui.ResultsScreen
 import cloud.g3h.nimbus.ui.Screen
 import cloud.g3h.nimbus.ui.SettingsScreen
 import cloud.g3h.nimbus.ui.TestScreen
+import cloud.g3h.nimbus.ui.UpdateBanner
 import cloud.g3h.nimbus.ui.NimbusTypography
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
 
@@ -47,6 +50,13 @@ class MainActivity : ComponentActivity() {
                         Screen.HISTORY -> HistoryScreen(vm = vm, modifier = Modifier.fillMaxSize())
                         Screen.SETTINGS -> SettingsScreen(vm = vm, modifier = Modifier.fillMaxSize())
                     }
+                    // Automatic-update progress/done is surfaced on every screen.
+                    UpdateBanner(
+                        vm = vm,
+                        modifier = Modifier
+                            .align(androidx.compose.ui.Alignment.TopCenter)
+                            .padding(top = 80.dp)
+                    )
                 }
             }
         }

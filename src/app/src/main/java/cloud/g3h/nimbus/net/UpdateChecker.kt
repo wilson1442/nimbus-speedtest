@@ -46,6 +46,13 @@ object UpdateChecker {
     )
 
     /**
+     * Throttle gate for automatic checks. Due when never checked (`<= 0`), or
+     * when at least [intervalMs] has elapsed. Pure → unit-tested.
+     */
+    fun isCheckDue(lastCheckMillis: Long, nowMillis: Long, intervalMs: Long = CHECK_INTERVAL_MS): Boolean =
+        lastCheckMillis <= 0L || nowMillis - lastCheckMillis >= intervalMs
+
+    /**
      * Pure parse — unit-testable. Returns null when no signed-APK asset
      * is present or the payload is malformed.
      *

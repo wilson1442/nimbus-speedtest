@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.first
 
@@ -13,6 +14,8 @@ private val Context.settingsDataStore by preferencesDataStore(name = "nimbus_set
 val KEY_SERVER_URL = stringPreferencesKey("server_url")
 val KEY_IP_LOOKUP_URL = stringPreferencesKey("ip_lookup_url")
 val KEY_DURATION_SHORT = booleanPreferencesKey("duration_short")
+val KEY_AUTO_UPDATE = booleanPreferencesKey("auto_update")
+val KEY_LAST_UPDATE_CHECK = longPreferencesKey("last_update_check")
 
 /**
  * User settings (DataStore, per spec §3.5): speed-test server URL, IP lookup URL,
@@ -47,5 +50,21 @@ object SettingsStore {
 
     suspend fun setShortDuration(ctx: Context, value: Boolean) = ctx.settingsDataStore.edit {
         it[KEY_DURATION_SHORT] = value
+    }
+
+    /** true = check GitHub Releases for a newer build and install it automatically. */
+    suspend fun autoUpdate(ctx: Context): Boolean =
+        ctx.settingsDataStore.data.first()[KEY_AUTO_UPDATE] ?: true
+
+    suspend fun setAutoUpdate(ctx: Context, value: Boolean) = ctx.settingsDataStore.edit {
+        it[KEY_AUTO_UPDATE] = value
+    }
+
+    /** Epoch millis of the last update check (0 = never), for throttling. */
+    suspend fun lastUpdateCheck(ctx: Context): Long =
+        ctx.settingsDataStore.data.first()[KEY_LAST_UPDATE_CHECK] ?: 0L
+
+    suspend fun setLastUpdateCheck(ctx: Context, value: Long) = ctx.settingsDataStore.edit {
+        it[KEY_LAST_UPDATE_CHECK] = value
     }
 }

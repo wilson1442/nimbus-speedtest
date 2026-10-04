@@ -118,11 +118,32 @@ fun SettingsScreen(
                     WarnButton("Clear history", onClick = { vm.askClearHistory() }, icon = { TrashIcon(WarnText, it) }, sizeSp = 9.5f)
                 }
             )
+            SettingsRow(
+                label = "Auto-update",
+                sub = if (settings.autoUpdate)
+                    "Checks for a new release on launch and installs it"
+                else "Off — use Check below to look manually",
+                trailing = {
+                    Box(
+                        modifier = Modifier
+                            .background(if (settings.autoUpdate) Tint else NeutralPill, RoundedCornerShape(999.dp))
+                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                    ) {
+                        Text(
+                            if (settings.autoUpdate) "On" else "Off",
+                            fontSize = 10.sp, fontWeight = FontWeight.SemiBold,
+                            color = if (settings.autoUpdate) Ink else Ink2,
+                            fontFamily = ChakraPetch
+                        )
+                    }
+                    SecondaryButton("Change", onClick = { vm.setAutoUpdate(!settings.autoUpdate) }, sizeSp = 10f)
+                }
+            )
             UpdateRow(settings = settings, vm = vm)
             Spacer(Modifier.weight(1f))
             SettingsRow(
                 label = "About",
-                sub = "Nimbus Speed Test · v${settings.versionName} · cloud.g3h.nimbus"
+                sub = "Nimbus Speed Test · v${settings.versionName} (build ${cloud.g3h.nimbus.BuildConfig.VERSION_CODE}) · cloud.g3h.nimbus"
             )
         }
     }

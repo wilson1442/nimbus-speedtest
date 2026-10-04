@@ -149,7 +149,7 @@ fun HomeScreen(
             val serverName = if (settings.serverUrl.isBlank()) "Auto (nearest)"
             else hostOf(settings.serverUrl)
             Text(
-                "Measures ping, download and upload in about 30 seconds · Server: $serverName",
+                "Measures ping, download and upload in about 30 seconds · Server: $serverName · v${cloud.g3h.nimbus.BuildConfig.VERSION_NAME}",
                 fontSize = 11.sp, color = Ink2, fontFamily = ChakraPetch
             )
             if (conn.vpnActive) {

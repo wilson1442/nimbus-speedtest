@@ -62,7 +62,8 @@ data class SettingsUiState(
     val serverUrl: String = "",
     val ipLookupUrl: String = "",
     val shortDuration: Boolean = false,
-    val versionName: String = "1.0.0",
+    val autoUpdate: Boolean = true,
+    val versionName: String = cloud.g3h.nimbus.BuildConfig.VERSION_NAME,
     // update-check state
     val updateStatus: UpdateChecker.Status = UpdateChecker.Status.IDLE,
     val updateInfo: UpdateChecker.UpdateInfo? = null,
@@ -113,16 +114,20 @@ class NimbusViewModel(private val app: NimbusApp) : ViewModel() {
                 val sUrl = SettingsStore.serverUrl(ctx)
                 val ip = SettingsStore.ipLookupUrl(ctx)
                 val short = SettingsStore.shortDuration(ctx)
+                val auto = SettingsStore.autoUpdate(ctx)
                 settings.update {
                     it.copy(
                         serverUrl = sUrl,
                         ipLookupUrl = ip,
                         shortDuration = short,
+                        autoUpdate = auto,
                         versionName = cloud.g3h.nimbus.BuildConfig.VERSION_NAME
                     )
                 }
             }
         }
+        // Check for a newer release on launch (throttled, honours the pref).
+        autoCheckForUpdates()
     }
 
     // ---------- Navigation ----------
@@ -386,29 +391,69 @@ class NimbusViewModel(private val app: NimbusApp) : ViewModel() {
     }
 
     // ---------- Updates ----------
-    fun checkForUpdates() {
+
+    /** Manual check (Settings → Check / Retry). */
+    fun checkForUpdates() = runUpdateCheck(auto = false)
+
+    /**
+     * Launch-time check: throttled to [UpdateChecker.CHECK_INTERVAL_MS] and
+     * skipped entirely when the user turned auto-update off. When a newer
+     * release exists the whole chain runs unattended (check → download →
+     * hand to the system installer); the user only confirms in the installer.
+     */
+    private fun autoCheckForUpdates() {
+        viewModelScope.launch {
+            val ctx = app.applicationContext
+            if (!SettingsStore.autoUpdate(ctx)) return@launch
+            val last = SettingsStore.lastUpdateCheck(ctx)
+            if (!UpdateChecker.isCheckDue(last, System.currentTimeMillis())) return@launch
+            SettingsStore.setLastUpdateCheck(ctx, System.currentTimeMillis())
+            runUpdateCheck(auto = true)
+        }
+    }
+
+    private fun runUpdateCheck(auto: Boolean) {
         val cur = cloud.g3h.nimbus.BuildConfig.VERSION_CODE
         settings.update { it.copy(updateStatus = UpdateChecker.Status.CHECKING, updateError = null) }
         UpdateChecker.checkNow { status, info, err ->
             when {
                 status == UpdateChecker.Status.ERROR ->
                     settings.update { it.copy(updateStatus = status, updateError = err, updateInfo = null, downloadPct = -1) }
-                info != null && info.versionCode > cur ->
+                info != null && info.versionCode > cur -> {
                     settings.update { it.copy(updateStatus = UpdateChecker.Status.AVAILABLE, updateInfo = info, updateError = null, downloadPct = -1) }
+                    if (auto) downloadUpdate(auto = true)
+                }
                 else ->
                     settings.update { it.copy(updateStatus = UpdateChecker.Status.UP_TO_DATE, updateInfo = null, updateError = null, downloadPct = -1) }
             }
         }
     }
 
-    fun downloadUpdate() {
+    /** [auto] = start the installer as soon as the download finishes. */
+    fun downloadUpdate(auto: Boolean = false) {
         val info = settings.value.updateInfo ?: return
         settings.update { it.copy(updateStatus = UpdateChecker.Status.DOWNLOADING, downloadPct = 0) }
         UpdateChecker.download(app.applicationContext, info) { pct ->
             when {
-                pct == 100 -> settings.update { it.copy(updateStatus = UpdateChecker.Status.READY, downloadPct = 100) }
+                pct == 100 -> {
+                    settings.update { it.copy(updateStatus = UpdateChecker.Status.READY, downloadPct = 100) }
+                    if (auto) viewModelScope.launch { installUpdate() }
+                }
                 pct >= 0 -> settings.update { it.copy(downloadPct = pct) }
                 else -> settings.update { it.copy(updateStatus = UpdateChecker.Status.ERROR, updateError = "Download failed. Try again.", downloadPct = -1) }
+            }
+        }
+    }
+
+    /** Auto-update preference; re-enabling allows an immediate check. */
+    fun setAutoUpdate(v: Boolean) {
+        settings.update { it.copy(autoUpdate = v) }
+        viewModelScope.launch {
+            val ctx = app.applicationContext
+            SettingsStore.setAutoUpdate(ctx, v)
+            if (v) {
+                SettingsStore.setLastUpdateCheck(ctx, 0L)
+                autoCheckForUpdates()
             }
         }
     }
@@ -417,20 +462,39 @@ class NimbusViewModel(private val app: NimbusApp) : ViewModel() {
     fun installUpdate() {
         val info = settings.value.updateInfo ?: return
         val file = UpdateChecker.cachedApk(app.applicationContext, info) ?: return
+        val ctx = app.applicationContext
+
+        // Android 8+: the installer refuses APKs from an app that isn't allowed
+        // to install unknown apps. Send the user straight to that toggle instead
+        // of failing silently.
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O &&
+            !ctx.packageManager.canRequestPackageInstalls()
+        ) {
+            runCatching {
+                ctx.startActivity(
+                    android.content.Intent(
+                        android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                        android.net.Uri.parse("package:${ctx.packageName}")
+                    ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+            }
+            return
+        }
+
         val uri = androidx.core.content.FileProvider.getUriForFile(
-            app.applicationContext,
-            "${app.applicationContext.packageName}.fileprovider",
+            ctx,
+            "${ctx.packageName}.fileprovider",
             file
         )
         val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
             .setDataAndType(uri, "application/vnd.android.package-archive")
             .addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
         try {
-            app.applicationContext.startActivity(intent)
+            ctx.startActivity(intent)
         } catch (e: Exception) {
             // No chooser on some TV boxes — fall back to the release page in a browser.
             runCatching {
-                app.applicationContext.startActivity(
+                ctx.startActivity(
                     android.content.Intent(
                         android.content.Intent.ACTION_VIEW,
                         android.net.Uri.parse("https://github.com/wilson1442/nimbus-speedtest/releases")

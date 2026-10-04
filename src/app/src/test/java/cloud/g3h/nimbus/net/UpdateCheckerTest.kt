@@ -47,4 +47,35 @@ class UpdateCheckerTest {
     fun `malformed json yields null`() {
         assertNull(UpdateChecker.parseRelease("{nope"))
     }
+
+    // --- auto-update throttle gate ---
+
+    @Test
+    fun `never-checked is always due`() {
+        assertTrue(UpdateChecker.isCheckDue(0L, nowMillis = 1_000_000L))
+    }
+
+    @Test
+    fun `check inside the interval is not due`() {
+        val interval = UpdateChecker.CHECK_INTERVAL_MS
+        val last = 10_000_000L
+        assertFalse(UpdateChecker.isCheckDue(last, last + interval - 1))
+    }
+
+    @Test
+    fun `check past the interval is due`() {
+        val interval = UpdateChecker.CHECK_INTERVAL_MS
+        val last = 10_000_000L
+        assertTrue(UpdateChecker.isCheckDue(last, last + interval))
+        assertTrue(UpdateChecker.isCheckDue(last, last + interval * 3))
+    }
+
+    @Test
+    fun `default interval is six hours`() {
+        assertEquals(6L * 3600_000, UpdateChecker.CHECK_INTERVAL_MS)
+        // 5h59m after a check -> not due; 6h -> due
+        val last = 1_000_000L
+        assertFalse(UpdateChecker.isCheckDue(last, last + 5L * 3600_000 + 59L * 60_000))
+        assertTrue(UpdateChecker.isCheckDue(last, last + 6L * 3600_000))
+    }
 }
