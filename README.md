@@ -5,11 +5,11 @@ Speed test for Android TV and phones — **Kotlin + Jetpack Compose**, LibreSpee
 | | |
 |---|---|
 | Package | `cloud.g3h.nimbus` |
-| Current release | v1.4.0 / versionCode 9 (see `handoff/RELEASE_RECORD.md`) |
+| Current release | v1.5.0 / versionCode 10 (see `handoff/RELEASE_RECORD.md`) |
 | minSdk / targetSdk | 24 / 35 |
 | Leanback / touchscreen | both optional (one APK for TV + phones) |
 | Engine | LibreSpeed protocol: `empty.php` ping/upload · `garbage.php` download |
-| Default server | `https://nyc.speedtest.clouvider.net/backend` — plus a picker of 12 verified public backends (US East/Central/West, Europe, Asia) in Settings; any custom URL accepted |
+| Default server | `https://nyc.speedtest.clouvider.net/backend` — pickable from the **Home screen** (flag + city chips) or Settings, from 12 verified public backends; any custom URL accepted |
 | Persistence | Room (test history) + DataStore (settings) |
 | UI | Compose 1.7.6, material3, D-pad focus, bundled Chakra Petch + Oxanium fonts |
 
@@ -68,13 +68,13 @@ The public builder domain is behind Cloudflare: API calls need a browser-like `U
 Installed apps update themselves from **GitHub Releases** — this repo's release page *is* the distribution endpoint:
 
 - `release.sh` attaches the signed APK to the tag's GitHub Release (asset name `nimbus-speedtest-<version>-v<code>-signed.apk`) and writes a machine-readable `nimbus-versionCode=<code>` line into the release notes.
-- **Automatic.** On launch the app checks the public GitHub API (`GET /repos/wilson1442/nimbus-speedtest/releases/latest`), compares `versionCode` against its own, and when a newer build exists it downloads the APK in-app and hands it straight to the system installer — no manual step beyond confirming the installer dialog. Checks are throttled to once per 6 h (`UpdateChecker.CHECK_INTERVAL_MS`) so the unauthenticated 60-requests/hour/IP budget is never approached, and the whole behaviour has an **Settings → Auto-update On/Off** toggle (default On).
-- Progress is shown by a global **update banner** (`ui/UpdateBanner.kt`, rendered at the composition root) on every screen: *available → downloading N% → ready · Install now*.
+- **Automatic check, explicit consent.** On **every app open** the app checks the public GitHub API (`GET /repos/wilson1442/nimbus-speedtest/releases/latest`) and compares `versionCode` against its own. When a newer build exists it **prompts**: *"Update available — vX (Y MB). Download it now?"* → Download / Later, then *"Update ready to install"* → Install now / Later. Nothing is downloaded or installed without the user accepting; BACK dismisses the prompt for that session. (A 60 s floor between checks only stops a crash/restart loop from hammering the API — it is not a periodic throttle.)
+- Download progress shows as a banner pill on every screen; the **Settings → App update** row still offers a manual *Check* / *Download* / *Install*, and the **Auto-update** toggle (default On) can disable the launch check entirely.
 - The APK is verified (zip + `AndroidManifest.xml`) before promotion and handed over via a `FileProvider` URI. Android 8+ requires allowing Nimbus to install unknown apps once (`REQUEST_INSTALL_PACKAGES`); the app detects this and opens the right Settings toggle instead of failing silently.
-- **Settings → App update** still offers a manual *Check* / *Download* / *Install*, and **Settings → About** shows the running version and build number. The version also appears on the Home screen under the START button.
+- **Settings → About** shows the running version and build number; the version also appears on the Home screen under the START button.
 - No backend, no server, no Play Store.
 
-To push an update to devices: ship a new tag via the pipeline above. Devices on v1.3.0+ pick it up automatically on next launch; anything older needs one manual Settings → Check.
+To push an update to devices: ship a new tag via the pipeline above. Devices on v1.3.0+ check on every launch, so they'll be prompted shortly after next open.
 
 ## Tests
 
@@ -89,14 +89,14 @@ Full suite: **33/33**.
 
 ## Speed-test servers
 
-Settings → **Speed test server → Choose** lists 12 public LibreSpeed-compatible backends, grouped by region:
+A **Location** row on the Home screen (and Settings → *Speed test server → Choose*) lists 12 public LibreSpeed-compatible backends, each with its **country flag**:
 
-| Region | Servers |
-|---|---|
-| US · East | New York, Atlanta |
-| US · Central | Chicago, Denver, Grand Rapids |
-| US · West | Los Angeles (Clouvider), Las Vegas |
-| Europe | London, Amsterdam, Frankfurt, Prague |
-| Asia | Tokyo |
+| Region | Servers | Flag |
+|---|---|---|
+| US · East | New York, Atlanta | 🇺🇸 US |
+| US · Central | Chicago, Denver, Grand Rapids | 🇺🇸 US |
+| US · West | Los Angeles (Clouvider), Las Vegas | 🇺🇸 US |
+| Europe | London, Amsterdam, Frankfurt, Prague | UK, NL, DE, CZ |
+| Asia | Tokyo | JP |
 
-Every entry was probed against the engine's real contract before being listed (`GET empty.php` 200; `GET garbage.php?ckSize=1` 200 with a complete 1,048,576-byte body; `POST empty.php` 200). Picking one selects it *and* probes it immediately; **Custom URL…** still allows any endpoint. There is **no public Canadian LibreSpeed backend** — the official list has none, so the nearest US server is the substitute.
+Flags are hand-authored vector drawables (`res/drawable/flag_*.xml`); a globe marks a custom URL. Every entry was probed against the engine's real contract before being listed (`GET empty.php` 200; `GET garbage.php?ckSize=1` 200 with a complete 1,048,576-byte body; `POST empty.php` 200). Picking one selects it *and* probes it immediately; **Custom URL…** still allows any endpoint. There is **no public Canadian LibreSpeed backend** — the official list has none, so the nearest US server is the substitute.
