@@ -27,23 +27,18 @@ import cloud.g3h.nimbus.net.UpdateChecker
 fun UpdateBanner(vm: NimbusViewModel, modifier: Modifier = Modifier) {
     val settings by vm.settings.collectAsState()
     val status = settings.updateStatus
-    if (status != UpdateChecker.Status.AVAILABLE &&
-        status != UpdateChecker.Status.DOWNLOADING &&
-        status != UpdateChecker.Status.READY
-    ) return
+    // Only the in-flight download needs a persistent banner; "available" and
+    // "ready" are handled by the modal UpdatePrompt (explicit consent).
+    if (status != UpdateChecker.Status.DOWNLOADING) return
 
     val version = settings.updateInfo?.tagName?.trimStart('v') ?: "?"
-    val text = when (status) {
-        UpdateChecker.Status.AVAILABLE -> "Update v$version available · starting download…"
-        UpdateChecker.Status.DOWNLOADING -> "Downloading update v$version · ${settings.downloadPct}%"
-        else -> "Update v$version ready · installing…"
-    }
+    val text = "Downloading update v$version · ${settings.downloadPct}%"
 
     Row(
         modifier = modifier
             .background(Tint, RoundedCornerShape(999.dp))
             .border(1.dp, CardBorderActive, RoundedCornerShape(999.dp))
-            .padding(start = 16.dp, end = if (status == UpdateChecker.Status.READY) 8.dp else 16.dp, top = 8.dp, bottom = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(9.dp)
     ) {
@@ -53,10 +48,5 @@ fun UpdateBanner(vm: NimbusViewModel, modifier: Modifier = Modifier) {
             fontSize = 11.sp, fontWeight = FontWeight.SemiBold,
             color = Ink, fontFamily = ChakraPetch
         )
-        // Fallback if the automatic installer launch doesn't take (e.g. the
-        // app was backgrounded); one tap re-hands the APK to the installer.
-        if (status == UpdateChecker.Status.READY) {
-            PrimaryButton("Install now", onClick = { vm.installUpdate() }, sizeSp = 9.5f)
-        }
     }
 }

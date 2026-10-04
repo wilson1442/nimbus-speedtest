@@ -60,4 +60,19 @@ class SpeedServersTest {
         assertEquals("London, UK", SpeedServers.displayName("https://lon.speedtest.clouvider.net/backend"))
         assertEquals("custom.example.net", SpeedServers.displayName("https://custom.example.net/backend"))
     }
+
+    @Test
+    fun `every preset carries a flag drawable`() {
+        SpeedServers.ALL.forEach { s ->
+            assertTrue("${s.label} is missing a flag resource", s.flag != 0)
+        }
+        assertTrue("custom endpoints need a fallback flag", SpeedServers.CUSTOM_FLAG != 0)
+    }
+
+    @Test
+    fun `shortName drops the country suffix`() {
+        assertEquals("New York", SpeedServers.ALL.first { it.label == "New York, US" }.shortName)
+        assertEquals("Grand Rapids", SpeedServers.ALL.first { it.label == "Grand Rapids, US" }.shortName)
+        assertEquals("Tokyo", SpeedServers.ALL.first { it.label == "Tokyo, JP" }.shortName)
+    }
 }

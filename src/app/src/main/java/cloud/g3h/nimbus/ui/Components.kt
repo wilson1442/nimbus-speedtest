@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -22,6 +23,23 @@ import androidx.compose.material3.Text
 import androidx.compose.foundation.Canvas
 
 // ---------- Icons (24dp grid, stroked, drawn with Canvas) ----------
+
+/**
+ * Country flag from a vector drawable. [contentDescription] is null by design —
+ * the flag always sits next to a text label, so announcing it again would be
+ * noise for a screen reader.
+ */
+@Composable
+fun FlagImage(
+    @androidx.annotation.DrawableRes res: Int,
+    modifier: Modifier = Modifier
+) {
+    androidx.compose.foundation.Image(
+        painter = androidx.compose.ui.res.painterResource(res),
+        contentDescription = null,
+        modifier = modifier.clip(RoundedCornerShape(2.dp))
+    )
+}
 
 @Composable
 fun ShieldIcon(vpnOn: Boolean, tint: Color, modifier: Modifier = Modifier.size(14.dp)) {

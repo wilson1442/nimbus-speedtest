@@ -1,0 +1,43 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="30dp"
+    android:height="15dp"
+    android:viewportWidth="60"
+    android:viewportHeight="30">
+
+    <!-- Blue field -->
+    <path
+        android:fillColor="#012169"
+        android:pathData="M0,0h60v30h-60z" />
+    <!-- White diagonals -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="6"
+        android:pathData="M0,0 L60,30" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="6"
+        android:pathData="M60,0 L0,30" />
+    <!-- Red diagonals (offset, simplified) -->
+    <path
+        android:strokeColor="#C8102E"
+        android:strokeWidth="2.5"
+        android:pathData="M0,0 L60,30" />
+    <path
+        android:strokeColor="#C8102E"
+        android:strokeWidth="2.5"
+        android:pathData="M60,0 L0,30" />
+    <!-- White cross -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M25,0h10v30h-10z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M0,10h60v10h-60z" />
+    <!-- Red cross -->
+    <path
+        android:fillColor="#C8102E"
+        android:pathData="M27,0h6v30h-6z" />
+    <path
+        android:fillColor="#C8102E"
+        android:pathData="M0,12h60v6h-60z" />
+</vector>

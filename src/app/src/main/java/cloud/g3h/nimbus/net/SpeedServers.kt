@@ -1,11 +1,18 @@
 package cloud.g3h.nimbus.net
 
+import androidx.annotation.DrawableRes
+import cloud.g3h.nimbus.R
+
 /** A user-selectable public LibreSpeed-compatible backend. */
 data class SpeedServer(
     val label: String,
     val region: String,
-    val url: String
-)
+    val url: String,
+    @DrawableRes val flag: Int
+) {
+    /** "New York" from "New York, US" — for the tight chips on the Home screen. */
+    val shortName: String get() = label.substringBefore(',')
+}
 
 /**
  * Curated public LibreSpeed-compatible backends, so the user can pick a nearby
@@ -22,24 +29,27 @@ data class SpeedServer(
  */
 object SpeedServers {
 
+    /** Flag shown for a manually-entered endpoint with no country of its own. */
+    @DrawableRes val CUSTOM_FLAG: Int = R.drawable.ic_globe
+
     val ALL: List<SpeedServer> = listOf(
         // US — East
-        SpeedServer("New York, US",     "US · East",    "https://nyc.speedtest.clouvider.net/backend"),
-        SpeedServer("Atlanta, US",      "US · East",    "https://atl.speedtest.clouvider.net/backend"),
+        SpeedServer("New York, US",     "US · East",    "https://nyc.speedtest.clouvider.net/backend",  R.drawable.flag_us),
+        SpeedServer("Atlanta, US",      "US · East",    "https://atl.speedtest.clouvider.net/backend",  R.drawable.flag_us),
         // US — Central
-        SpeedServer("Chicago, US",      "US · Central", "https://chispeed.sharktech.net/backend"),
-        SpeedServer("Denver, US",       "US · Central", "https://denspeed.sharktech.net/backend"),
-        SpeedServer("Grand Rapids, US", "US · Central", "https://mispeed.rackgenius.com/backend"),
+        SpeedServer("Chicago, US",      "US · Central", "https://chispeed.sharktech.net/backend",       R.drawable.flag_us),
+        SpeedServer("Denver, US",       "US · Central", "https://denspeed.sharktech.net/backend",       R.drawable.flag_us),
+        SpeedServer("Grand Rapids, US", "US · Central", "https://mispeed.rackgenius.com/backend",       R.drawable.flag_us),
         // US — West
-        SpeedServer("Los Angeles, US",  "US · West",    "https://la.speedtest.clouvider.net/backend"),
-        SpeedServer("Las Vegas, US",    "US · West",    "https://lasspeed.sharktech.net/backend"),
+        SpeedServer("Los Angeles, US",  "US · West",    "https://la.speedtest.clouvider.net/backend",   R.drawable.flag_us),
+        SpeedServer("Las Vegas, US",    "US · West",    "https://lasspeed.sharktech.net/backend",       R.drawable.flag_us),
         // Europe
-        SpeedServer("London, UK",       "Europe",       "https://lon.speedtest.clouvider.net/backend"),
-        SpeedServer("Amsterdam, NL",    "Europe",       "https://ams.speedtest.clouvider.net/backend"),
-        SpeedServer("Frankfurt, DE",    "Europe",       "https://fra.speedtest.clouvider.net/backend"),
-        SpeedServer("Prague, CZ",       "Europe",       "https://librespeed.turris.cz/backend"),
+        SpeedServer("London, UK",       "Europe",       "https://lon.speedtest.clouvider.net/backend",  R.drawable.flag_gb),
+        SpeedServer("Amsterdam, NL",    "Europe",       "https://ams.speedtest.clouvider.net/backend",  R.drawable.flag_nl),
+        SpeedServer("Frankfurt, DE",    "Europe",       "https://fra.speedtest.clouvider.net/backend",  R.drawable.flag_de),
+        SpeedServer("Prague, CZ",       "Europe",       "https://librespeed.turris.cz/backend",         R.drawable.flag_cz),
         // Asia
-        SpeedServer("Tokyo, JP",        "Asia",         "https://librespeed.a573.net/backend")
+        SpeedServer("Tokyo, JP",        "Asia",         "https://librespeed.a573.net/backend",          R.drawable.flag_jp)
     )
 
     /** The preset matching [url], or null for a custom/blank URL. */

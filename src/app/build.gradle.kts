@@ -24,8 +24,8 @@ android {
         applicationId = "cloud.g3h.nimbus"
         minSdk = 24
         targetSdk = 35
-        versionCode = 9
-        versionName = "1.4.0"
+        versionCode = 10
+        versionName = "1.5.0"
         // BuildConfig.API_BASE_URL: default speed-test server baked at build
         // time (NYC Clouvider LibreSpeed backend; user can override in Settings).
         buildConfigField(

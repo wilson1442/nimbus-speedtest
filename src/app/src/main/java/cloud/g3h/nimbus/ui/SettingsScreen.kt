@@ -128,7 +128,7 @@ fun SettingsScreen(
             SettingsRow(
                 label = "Auto-update",
                 sub = if (settings.autoUpdate)
-                    "Checks for a new release on launch and installs it"
+                    "Checks every time the app opens, then asks before downloading"
                 else "Off — use Check below to look manually",
                 trailing = {
                     Box(
@@ -256,7 +256,8 @@ private fun ServerPickerDialog(
                 server = SpeedServer(
                     label = if (isCustom) "Custom: " + SpeedServers.displayName(current) else "Custom URL…",
                     region = "Manual",
-                    url = current
+                    url = current,
+                    flag = SpeedServers.CUSTOM_FLAG
                 ),
                 selected = isCustom,
                 onClick = onCustomUrl
@@ -287,6 +288,8 @@ private fun ServerOption(
             .padding(horizontal = 13.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        FlagImage(server.flag, Modifier.size(width = 20.dp, height = 14.dp))
+        Spacer(Modifier.width(9.dp))
         Text(
             server.label,
             modifier = Modifier.weight(1f),

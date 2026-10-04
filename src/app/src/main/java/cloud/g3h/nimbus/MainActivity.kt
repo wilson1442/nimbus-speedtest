@@ -18,6 +18,7 @@ import cloud.g3h.nimbus.ui.Screen
 import cloud.g3h.nimbus.ui.SettingsScreen
 import cloud.g3h.nimbus.ui.TestScreen
 import cloud.g3h.nimbus.ui.UpdateBanner
+import cloud.g3h.nimbus.ui.UpdatePrompt
 import cloud.g3h.nimbus.ui.NimbusTypography
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.foundation.background
@@ -57,6 +58,8 @@ class MainActivity : ComponentActivity() {
                             .align(androidx.compose.ui.Alignment.TopCenter)
                             .padding(top = 80.dp)
                     )
+                    // Modal consent prompt for an available/downloaded update.
+                    UpdatePrompt(vm = vm)
                 }
             }
         }

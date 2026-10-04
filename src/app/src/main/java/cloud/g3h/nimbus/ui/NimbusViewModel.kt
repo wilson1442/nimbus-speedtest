@@ -68,7 +68,9 @@ data class SettingsUiState(
     val updateStatus: UpdateChecker.Status = UpdateChecker.Status.IDLE,
     val updateInfo: UpdateChecker.UpdateInfo? = null,
     val updateError: String? = null,
-    val downloadPct: Int = -1
+    val downloadPct: Int = -1,
+    /** True while the "update available / ready" prompt should be on screen. */
+    val updatePromptVisible: Boolean = false
 )
 
 /** Server reachability probe result (Settings → Test connection). */
@@ -382,6 +384,10 @@ class NimbusViewModel(private val app: NimbusApp) : ViewModel() {
             dismissClearHistory()
             return
         }
+        if (settings.value.updatePromptVisible) {
+            dismissUpdatePrompt()
+            return
+        }
         dialogBack?.let { back -> back(); return }
         when (screen.value) {
             Screen.HOME -> Unit
@@ -393,13 +399,13 @@ class NimbusViewModel(private val app: NimbusApp) : ViewModel() {
     // ---------- Updates ----------
 
     /** Manual check (Settings → Check / Retry). */
-    fun checkForUpdates() = runUpdateCheck(auto = false)
+    fun checkForUpdates() = runUpdateCheck()
 
     /**
-     * Launch-time check: throttled to [UpdateChecker.CHECK_INTERVAL_MS] and
-     * skipped entirely when the user turned auto-update off. When a newer
-     * release exists the whole chain runs unattended (check → download →
-     * hand to the system installer); the user only confirms in the installer.
+     * Runs on EVERY app open: if a newer release exists the user is PROMPTED to
+     * download it — nothing is fetched or installed without consent. Skipped
+     * only when auto-update is off, or when another check ran < 60 s ago
+     * (restart-loop guard).
      */
     private fun autoCheckForUpdates() {
         viewModelScope.launch {
@@ -408,42 +414,58 @@ class NimbusViewModel(private val app: NimbusApp) : ViewModel() {
             val last = SettingsStore.lastUpdateCheck(ctx)
             if (!UpdateChecker.isCheckDue(last, System.currentTimeMillis())) return@launch
             SettingsStore.setLastUpdateCheck(ctx, System.currentTimeMillis())
-            runUpdateCheck(auto = true)
+            runUpdateCheck()
         }
     }
 
-    private fun runUpdateCheck(auto: Boolean) {
+    private fun runUpdateCheck() {
         val cur = cloud.g3h.nimbus.BuildConfig.VERSION_CODE
         settings.update { it.copy(updateStatus = UpdateChecker.Status.CHECKING, updateError = null) }
         UpdateChecker.checkNow { status, info, err ->
             when {
                 status == UpdateChecker.Status.ERROR ->
                     settings.update { it.copy(updateStatus = status, updateError = err, updateInfo = null, downloadPct = -1) }
-                info != null && info.versionCode > cur -> {
-                    settings.update { it.copy(updateStatus = UpdateChecker.Status.AVAILABLE, updateInfo = info, updateError = null, downloadPct = -1) }
-                    if (auto) downloadUpdate(auto = true)
-                }
+                info != null && info.versionCode > cur ->
+                    // Ask first — never download or install unattended.
+                    settings.update {
+                        it.copy(
+                            updateStatus = UpdateChecker.Status.AVAILABLE,
+                            updateInfo = info,
+                            updateError = null,
+                            downloadPct = -1,
+                            updatePromptVisible = true
+                        )
+                    }
                 else ->
                     settings.update { it.copy(updateStatus = UpdateChecker.Status.UP_TO_DATE, updateInfo = null, updateError = null, downloadPct = -1) }
             }
         }
     }
 
-    /** [auto] = start the installer as soon as the download finishes. */
-    fun downloadUpdate(auto: Boolean = false) {
+    /** User accepted the prompt: fetch the APK, then re-prompt to install. */
+    fun downloadUpdate() {
         val info = settings.value.updateInfo ?: return
-        settings.update { it.copy(updateStatus = UpdateChecker.Status.DOWNLOADING, downloadPct = 0) }
+        settings.update { it.copy(updateStatus = UpdateChecker.Status.DOWNLOADING, downloadPct = 0, updatePromptVisible = false) }
         UpdateChecker.download(app.applicationContext, info) { pct ->
             when {
-                pct == 100 -> {
-                    settings.update { it.copy(updateStatus = UpdateChecker.Status.READY, downloadPct = 100) }
-                    if (auto) viewModelScope.launch { installUpdate() }
+                pct == 100 -> settings.update {
+                    it.copy(updateStatus = UpdateChecker.Status.READY, downloadPct = 100, updatePromptVisible = true)
                 }
                 pct >= 0 -> settings.update { it.copy(downloadPct = pct) }
-                else -> settings.update { it.copy(updateStatus = UpdateChecker.Status.ERROR, updateError = "Download failed. Try again.", downloadPct = -1) }
+                else -> settings.update {
+                    it.copy(
+                        updateStatus = UpdateChecker.Status.ERROR,
+                        updateError = "Download failed. Try again.",
+                        downloadPct = -1,
+                        updatePromptVisible = false
+                    )
+                }
             }
         }
     }
+
+    /** "Later" — hide the prompt for this session; the next launch asks again. */
+    fun dismissUpdatePrompt() = settings.update { it.copy(updatePromptVisible = false) }
 
     /** Auto-update preference; re-enabling allows an immediate check. */
     fun setAutoUpdate(v: Boolean) {
@@ -460,6 +482,7 @@ class NimbusViewModel(private val app: NimbusApp) : ViewModel() {
 
     /** Hands the cached APK to the system installer (FileProvider URI). */
     fun installUpdate() {
+        settings.update { it.copy(updatePromptVisible = false) }
         val info = settings.value.updateInfo ?: return
         val file = UpdateChecker.cachedApk(app.applicationContext, info) ?: return
         val ctx = app.applicationContext

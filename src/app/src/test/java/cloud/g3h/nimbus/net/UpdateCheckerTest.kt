@@ -57,25 +57,27 @@ class UpdateCheckerTest {
 
     @Test
     fun `check inside the interval is not due`() {
-        val interval = UpdateChecker.CHECK_INTERVAL_MS
+        val interval = UpdateChecker.MIN_CHECK_INTERVAL_MS
         val last = 10_000_000L
         assertFalse(UpdateChecker.isCheckDue(last, last + interval - 1))
     }
 
     @Test
     fun `check past the interval is due`() {
-        val interval = UpdateChecker.CHECK_INTERVAL_MS
+        val interval = UpdateChecker.MIN_CHECK_INTERVAL_MS
         val last = 10_000_000L
         assertTrue(UpdateChecker.isCheckDue(last, last + interval))
         assertTrue(UpdateChecker.isCheckDue(last, last + interval * 3))
     }
 
     @Test
-    fun `default interval is six hours`() {
-        assertEquals(6L * 3600_000, UpdateChecker.CHECK_INTERVAL_MS)
-        // 5h59m after a check -> not due; 6h -> due
+    fun `launch guard is 60s so every app open still checks`() {
+        // Checks run on EVERY app open; the 60 s floor only stops a restart loop
+        // from hammering the API. Two opens a minute apart both check.
+        assertEquals(60_000L, UpdateChecker.MIN_CHECK_INTERVAL_MS)
         val last = 1_000_000L
-        assertFalse(UpdateChecker.isCheckDue(last, last + 5L * 3600_000 + 59L * 60_000))
-        assertTrue(UpdateChecker.isCheckDue(last, last + 6L * 3600_000))
+        assertFalse("a second launch 30 s later is suppressed", UpdateChecker.isCheckDue(last, last + 30_000))
+        assertTrue("a launch 60 s later checks", UpdateChecker.isCheckDue(last, last + 60_000))
+        assertTrue("a launch an hour later checks", UpdateChecker.isCheckDue(last, last + 3_600_000))
     }
 }

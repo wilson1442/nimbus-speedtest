@@ -30,7 +30,14 @@ object UpdateChecker {
     const val REPO = "wilson1442/nimbus-speedtest"
     const val API_LATEST = "https://api.github.com/repos/$REPO/releases/latest"
     const val ASSET_SUFFIX = "-signed.apk"
-    const val CHECK_INTERVAL_MS = 6L * 3600_000
+
+    /**
+     * Launch checks run on EVERY app open — the user is asked to download when
+     * a newer build exists. This floor is not a periodic throttle; it only
+     * guards against a pathological restart loop hammering the unauthenticated
+     * GitHub API (60 requests/hour/IP).
+     */
+    const val MIN_CHECK_INTERVAL_MS = 60_000L
 
     enum class Status { IDLE, CHECKING, AVAILABLE, UP_TO_DATE, ERROR, DOWNLOADING, READY }
 
@@ -49,7 +56,7 @@ object UpdateChecker {
      * Throttle gate for automatic checks. Due when never checked (`<= 0`), or
      * when at least [intervalMs] has elapsed. Pure → unit-tested.
      */
-    fun isCheckDue(lastCheckMillis: Long, nowMillis: Long, intervalMs: Long = CHECK_INTERVAL_MS): Boolean =
+    fun isCheckDue(lastCheckMillis: Long, nowMillis: Long, intervalMs: Long = MIN_CHECK_INTERVAL_MS): Boolean =
         lastCheckMillis <= 0L || nowMillis - lastCheckMillis >= intervalMs
 
     /**

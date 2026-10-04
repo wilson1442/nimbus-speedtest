@@ -12,6 +12,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
@@ -31,6 +34,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Size
 import androidx.compose.material3.Text
+import cloud.g3h.nimbus.net.SpeedServer
+import cloud.g3h.nimbus.net.SpeedServers
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -97,6 +102,42 @@ fun HomeScreen(
             )
         }
 
+        // ---- location selector: pick the speed-test server's region, with its flag ----
+        val serverList = rememberLazyListState()
+        val selIndex = remember(settings.serverUrl) {
+            SpeedServers.ALL.indexOfFirst {
+                it.url.trimEnd('/').equals(settings.serverUrl.trim().trimEnd('/'), ignoreCase = true)
+            }
+        }
+        LaunchedEffect(selIndex) { if (selIndex >= 0) serverList.animateScrollToItem(selIndex) }
+        Row(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .padding(start = 48.dp, end = 48.dp, top = 84.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            SectionLabel("Location")
+            LazyRow(
+                state = serverList,
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(SpeedServers.ALL, key = { it.url }) { server ->
+                    LocationChip(
+                        server = server,
+                        selected = server.url.trimEnd('/')
+                            .equals(settings.serverUrl.trim().trimEnd('/'), ignoreCase = true),
+                        onClick = {
+                            vm.setServerUrl(server.url)
+                            vm.testServer(server.url)   // probe it straight away
+                        }
+                    )
+                }
+            }
+        }
+
         // ---- center stage: orbit + rings + ECG + START ----
         val startFocus = remember { FocusRequester() }
         LaunchedEffect(Unit) { startFocus.requestFocus() }
@@ -151,6 +192,28 @@ fun HomeScreen(
                 "Measures ping, download and upload in about 30 seconds · Server: $serverName · v${cloud.g3h.nimbus.BuildConfig.VERSION_NAME}",
                 fontSize = 11.sp, color = Ink2, fontFamily = ChakraPetch
             )
+            if (vm.probe.value.checking) {
+                Spacer(Modifier.height(6.dp))
+                Text("Checking $serverName…", fontSize = 9.sp, color = Ink2, fontFamily = ChakraPetch)
+            } else if (vm.probe.value.ok) {
+                Spacer(Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    CheckIcon(BlueStrong, Modifier.size(10.dp))
+                    Text(
+                        "$serverName reachable · ${fmt(vm.probe.value.bestMs, 0)} ms",
+                        fontSize = 9.sp, color = SubInk, fontFamily = ChakraPetch
+                    )
+                }
+            } else if (vm.probe.value.error != null) {
+                Spacer(Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    InfoCircleIcon(tint = WarnText, modifier = Modifier.size(10.dp))
+                    Text(
+                        "$serverName unreachable — try another location",
+                        fontSize = 9.sp, color = WarnText, fontFamily = ChakraPetch
+                    )
+                }
+            }
             if (conn.vpnActive) {
                 Spacer(Modifier.height(6.dp))
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
@@ -232,6 +295,30 @@ fun HomeScreen(
                 }
             }
         }
+    }
+}
+
+/** One location option on the Home selector: flag + short city, ticked when active. */
+@Composable
+private fun LocationChip(server: SpeedServer, selected: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .nimbusFocus(cornerRadius = 999.dp, ringThickness = 2.dp, gap = 4.dp)
+            .background(if (selected) BlueStrong else Surface, RoundedCornerShape(999.dp))
+            .border(1.dp, if (selected) BlueStrong else Line, RoundedCornerShape(999.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(7.dp)
+    ) {
+        FlagImage(server.flag, Modifier.size(width = 20.dp, height = 14.dp))
+        Text(
+            server.shortName,
+            fontSize = 11.sp,
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+            color = if (selected) Surface else Ink,
+            fontFamily = ChakraPetch
+        )
     }
 }
 
