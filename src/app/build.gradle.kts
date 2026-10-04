@@ -24,8 +24,8 @@ android {
         applicationId = "cloud.g3h.nimbus"
         minSdk = 24
         targetSdk = 35
-        versionCode = 15
-        versionName = "1.7.3"
+        versionCode = 16
+        versionName = "1.7.4"
         // BuildConfig.API_BASE_URL: default speed-test server baked at build
         // time (NYC Clouvider LibreSpeed backend; user can override in Settings).
         buildConfigField(
@@ -70,6 +70,13 @@ android {
             "META-INF/NOTICE.txt"
         )
     }
+    // Robolectric runs the Compose focus tests (FocusSemanticsTest) on the JVM;
+    // it needs the merged resources on the unit-test classpath.
+    testOptions {
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 dependencies {
@@ -96,4 +103,11 @@ dependencies {
     // Real org.json for JVM unit tests (Android's bundled copy is a stub
     // that throws at runtime under the plain JUnit runner).
     testImplementation("org.json:json:20240303")
+    // Compose UI tests on the JVM: focus behaviour is a runtime concern that
+    // cannot be asserted from source, and there is no emulator in this setup.
+    testImplementation(platform("androidx.compose:compose-bom:2024.12.01"))
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    testImplementation("org.robolectric:robolectric:4.14.1")
+    testImplementation("androidx.test:core-ktx:1.6.1")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }

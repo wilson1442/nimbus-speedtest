@@ -44,8 +44,12 @@ private val MinFocusRing = 3.dp
  * modifier already reserved, and `scale` is layout-neutral — so no screen
  * re-flows (the Home location dropdown is height-sensitive and was sized to fit).
  *
- * Built on the core Compose focus API (focusable + onFocusChanged), which is what
- * makes D-pad/remote input work without the tv-* libraries.
+ * Built on the core Compose focus API, which is what makes D-pad/remote input work
+ * without the tv-* libraries.
+ *
+ * The v1.7.2 version of this file got the contrast and thickness right but declared
+ * `focusable()` *before* `onFocusChanged`, so the state it watched never turned
+ * true and the ring never drew at all. A bright invisible ring is still invisible.
  */
 @Composable
 fun Modifier.nimbusFocus(
@@ -58,8 +62,13 @@ fun Modifier.nimbusFocus(
     // A floor, not an override: a call site may ask for a thicker ring, never an invisible one.
     val stroke = maxOf(ringThickness, MinFocusRing)
     return this
-        .focusable()
+        // ORDER IS LOAD-BEARING. Per Android's docs, "the onFocusChanged() modifier
+        // refers to the first focusable element that appears AFTER" it, so it must be
+        // declared BEFORE focusable(). With them the other way round it observes
+        // nothing at all, `focused` never turns true and the ring never draws —
+        // silently. FocusSemanticsTest pins both directions of this.
         .onFocusChanged { focused = it.isFocused }
+        .focusable()
         .then(if (focused) Modifier.scale(1.04f) else Modifier)
         .drawWithContent {
             drawContent()
