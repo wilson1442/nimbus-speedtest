@@ -201,7 +201,7 @@ fun HomeScreen(
         ) {
             val serverName = cloud.g3h.nimbus.net.SpeedServers.displayName(settings.serverUrl)
             Text(
-                "Measures ping, download and upload in about 30 seconds · Server: $serverName · v${cloud.g3h.nimbus.BuildConfig.VERSION_NAME}",
+                "Measures ping, download and upload in about 30 seconds · Server: $serverName",
                 fontSize = 11.sp, color = Ink2, fontFamily = ChakraPetch
             )
             if (vm.probe.value.checking) {
@@ -237,6 +237,20 @@ fun HomeScreen(
                 }
             }
         }
+
+        // ---- version, bottom-left of the dashboard ----
+        // Plain Text, so it is not a D-pad focus target. The strapline above used to
+        // carry the version too; it lives here only, so it appears once on the screen.
+        Text(
+            "v${cloud.g3h.nimbus.BuildConfig.VERSION_NAME}",
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(start = 48.dp, bottom = 26.dp),
+            fontSize = 9.sp,
+            fontWeight = FontWeight.Medium,
+            color = Ink2,
+            fontFamily = ChakraPetch
+        )
 
         // ---- footer: last test + 30-day average ----
         Row(
