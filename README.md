@@ -79,6 +79,10 @@ Installed apps update themselves from **GitHub Releases** — this repo's releas
 
 To push an update to devices: ship a new tag via the pipeline above. Devices on v1.3.0+ check on every launch, so they'll be prompted shortly after next open.
 
+> **Picking this up on another machine?** See [`SETUP.md`](SETUP.md) — what a `git clone`
+> gives you, what it deliberately does not (the build toolchain and the two credentials
+> needed to sign/publish), and the exact versions to install.
+
 ### Links to hand out
 
 Every release publishes the APK twice: the versioned asset (`nimbus-<ver>-v<code>-signed.apk`, what the in-app updater looks for, matched by its `-signed.apk` suffix)
